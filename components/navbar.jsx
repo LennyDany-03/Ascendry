@@ -33,9 +33,9 @@ const Navbar = () => {
     { name: "Home", href: "/" },
     { name: "Services", href: "services" },
     { name: "Projects", href: "projects" },
-    { name: "Store", href: "#store" },
-    { name: "Blog", href: "#blog" },
-    { name: "Contact", href: "#contact" },
+    { name: "Store", href: "store" },
+    { name: "Blog", href: "blog" },
+    { name: "Contact", href: "contact" },
   ]
 
   return (
@@ -101,7 +101,7 @@ const Navbar = () => {
             {/* CTA Button */}
             <div className="hidden md:block">
               <Link
-                href="#contact"
+                href="hire"
                 className={`bg-white hover:bg-gray-200 text-black font-semibold rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg relative overflow-hidden group ${
                   scrolled ? "px-4 py-2 text-sm" : "px-6 py-3 text-base"
                 }`}
