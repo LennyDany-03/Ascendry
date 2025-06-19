@@ -1,4 +1,4 @@
-"use client"
+
 import Navbar from "../components/navbar.jsx"
 import InteractiveBackground from "../components/interactive-background"
 import Footer from "../components/footer.jsx"
