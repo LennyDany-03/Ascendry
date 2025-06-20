@@ -1,160 +1,441 @@
 "use client"
 
 import Navbar from "../components/navbar.jsx"
-import InteractiveBackground from "../components/interactive-background"
 import Footer from "../components/footer.jsx"
+import InteractiveBackground from "../components/interactive-background"
+import Link from "next/link"
+import {
+  Globe,
+  Smartphone,
+  Server,
+  Palette,
+  ShoppingCart,
+  Lightbulb,
+  ArrowRight,
+  Sparkles,
+  Code,
+  Zap,
+  Star,
+  CheckCircle,
+  Award,
+  TrendingUp,
+  Rocket,
+  Brain,
+  Shield,
+} from "lucide-react"
 
 const Page = () => {
+  const services = [
+    {
+      title: "Web Development",
+      desc: "Modern, responsive websites built with cutting-edge technologies",
+      icon: Globe,
+      color: "from-blue-500 to-cyan-500",
+      bgColor: "bg-blue-500/10",
+      borderColor: "border-blue-500/30",
+    },
+    {
+      title: "Mobile Apps",
+      desc: "Native iOS and Android applications with seamless UX",
+      icon: Smartphone,
+      color: "from-green-500 to-emerald-500",
+      bgColor: "bg-green-500/10",
+      borderColor: "border-green-500/30",
+    },
+    {
+      title: "Backend Systems",
+      desc: "Scalable server solutions and robust API development",
+      icon: Server,
+      color: "from-purple-500 to-violet-500",
+      bgColor: "bg-purple-500/10",
+      borderColor: "border-purple-500/30",
+    },
+    {
+      title: "UI/UX Design",
+      desc: "Beautiful user experiences that convert and engage",
+      icon: Palette,
+      color: "from-pink-500 to-rose-500",
+      bgColor: "bg-pink-500/10",
+      borderColor: "border-pink-500/30",
+    },
+    {
+      title: "E-commerce",
+      desc: "Complete online store solutions with payment integration",
+      icon: ShoppingCart,
+      color: "from-orange-500 to-amber-500",
+      bgColor: "bg-orange-500/10",
+      borderColor: "border-orange-500/30",
+    },
+    {
+      title: "Consulting",
+      desc: "Strategic technical guidance and architecture planning",
+      icon: Lightbulb,
+      color: "from-yellow-500 to-orange-500",
+      bgColor: "bg-yellow-500/10",
+      borderColor: "border-yellow-500/30",
+    },
+  ]
+
+  const featuredProjects = [
+    {
+      title: "NovaPay",
+      desc: "AI-powered UPI expense tracker with smart categorization and budget insights",
+      tech: ["React", "Supabase", "AI/ML", "Chart.js"],
+      gradient: "from-blue-500 to-purple-500",
+    },
+    {
+      title: "ClubSphere",
+      desc: "Comprehensive college club management system with event handling",
+      tech: ["Next.js", "Firebase", "Stripe", "Analytics"],
+      gradient: "from-purple-500 to-pink-500",
+    },
+    {
+      title: "Exodus Ministry",
+      desc: "Modern church website with donation integration and media gallery",
+      tech: ["React", "CMS", "Payment", "Media"],
+      gradient: "from-green-500 to-blue-500",
+    },
+  ]
+
   return (
-    <div className="min-h-screen bg-black text-white relative">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      {/* Interactive Background Component */}
+      <br />
       <InteractiveBackground />
+
       <Navbar />
 
-      {/* Hero Section */}
-      <section id="home" className="pt-32 min-h-screen flex items-center justify-center relative">
-        {/* Geometric Shapes */}
-        <div className="absolute top-20 left-10 w-20 h-20 border-2 border-white/10 rotate-45 animate-spin-slow"></div>
-        <div className="absolute top-40 right-20 w-16 h-16 bg-white/5 rotate-12 animate-pulse"></div>
-        <div className="absolute bottom-32 left-1/4 w-12 h-12 border border-blue-900/40 rounded-full animate-bounce"></div>
-
-        <div className="max-w-6xl mx-auto px-6 text-center relative z-10">
-          <div className="mb-8">
-            <div className="inline-flex items-center space-x-2 px-6 py-3 bg-gray-900 rounded-full border border-gray-800 mb-8">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span className="text-gray-300 font-medium">Welcome to Ascendry</span>
-            </div>
-          </div>
-
-          <h1 className="text-7xl md:text-9xl font-black mb-8 relative">
-            <span className="text-white">BUILD.</span>
-            <br />
-            <span className="text-gray-600">CODE.</span>
-            <br />
-            <span className="text-blue-500">ASCEND.</span>
-          </h1>
-
-          <p className="text-xl md:text-2xl text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Professional development services that transform ideas into powerful digital solutions.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <button className="group bg-white hover:bg-gray-200 text-black px-10 py-4 font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl relative overflow-hidden">
-              <span className="relative z-10">Get Started</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-            </button>
-
-            <button className="border-2 border-white hover:bg-white hover:text-black text-white px-10 py-4 font-bold text-lg transition-all duration-300 hover:scale-105">
-              View Projects
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section id="services" className="py-20 bg-gray-950 relative">
-        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_49%,rgba(255,255,255,0.02)_50%,transparent_51%)] bg-[size:20px_20px]"></div>
-
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-black mb-4 text-white">SERVICES</h2>
-            <p className="text-xl text-gray-400">What I can help you with</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { title: "Web Development", desc: "Modern, responsive websites", icon: "🌐" },
-              { title: "Mobile Apps", desc: "iOS and Android applications", icon: "📱" },
-              { title: "Backend Systems", desc: "Scalable server solutions", icon: "⚙️" },
-              { title: "UI/UX Design", desc: "Beautiful user experiences", icon: "🎨" },
-              { title: "E-commerce", desc: "Online store solutions", icon: "🛒" },
-              { title: "Consulting", desc: "Technical guidance", icon: "💡" },
-            ].map((service, index) => (
-              <div
-                key={index}
-                className="group bg-black p-8 border border-gray-800 hover:border-white hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 relative overflow-hidden"
-              >
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-white via-blue-500 to-white scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-                <div className="text-4xl mb-6">{service.icon}</div>
-                <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-blue-400 transition-colors duration-300">
-                  {service.title}
-                </h3>
-                <p className="text-gray-400 group-hover:text-gray-200 transition-colors duration-300">{service.desc}</p>
+      {/* Hero Section - Enhanced */}
+      <section id="home" className="min-h-screen flex items-center justify-center relative z-10">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <br />
+          <br />
+          <br />  
+          <br />
+          {/* Main Typography - Enhanced */}
+          <div className="mb-12">
+            <h1 className="font-black leading-none">
+              {/* BUILD. */}
+              <div className="relative mb-4">
+                <span className="text-7xl md:text-8xl lg:text-8xl text-white drop-shadow-2xl">BUILD.</span>
+                <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-2xl opacity-50 animate-pulse"></div>
               </div>
-            ))}
+
+              {/* CODE. */}
+              <div className="relative mb-4">
+                <span className="text-7xl md:text-8xl lg:text-8xl text-gray-500 drop-shadow-xl">CODE.</span>
+                <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-2xl opacity-30 animate-pulse delay-1000"></div>
+              </div>
+
+              {/* ASCEND. */}
+              <div className="relative">
+                <span className="text-7xl md:text-8xl lg:text-8xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 drop-shadow-2xl">
+                  ASCEND.
+                </span>
+                <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30 blur-2xl opacity-60 animate-pulse delay-2000"></div>
+              </div>
+            </h1>
+          </div>
+
+          {/* Enhanced CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+            <Link
+              href="/hire"
+              className="group relative bg-white hover:bg-gray-100 text-black px-10 py-4 font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl rounded-xl overflow-hidden"
+            >
+              <span className="relative z-10 flex items-center space-x-2">
+                <Rocket className="w-5 h-5" />
+                <span>Get Started</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+            </Link>
+
+            <Link
+              href="/projects"
+              className="group border-2 border-white hover:bg-white hover:text-black text-white px-10 py-4 font-bold text-lg transition-all duration-300 hover:scale-105 rounded-xl flex items-center space-x-2"
+            >
+              <Code className="w-5 h-5" />
+              <span>View Projects</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+            </Link>
+          </div>
+
+          {/* Enhanced Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+            {[
+              { number: "50+", label: "Projects Completed", icon: CheckCircle, color: "text-green-400" },
+              { number: "100%", label: "Client Satisfaction", icon: Star, color: "text-yellow-400" },
+              { number: "3+", label: "Years Experience", icon: Award, color: "text-purple-400" },
+              { number: "24/7", label: "Support Available", icon: Shield, color: "text-blue-400" },
+            ].map((stat, index) => {
+              const IconComponent = stat.icon
+              return (
+                <div key={index} className="text-center group">
+                  <div className="w-16 h-16 bg-gray-900/50 backdrop-blur-xl border border-gray-700/50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:border-gray-600/50 transition-all duration-300">
+                    <IconComponent className={`w-8 h-8 ${stat.color}`} />
+                  </div>
+                  <div className="text-3xl font-black text-white mb-2">{stat.number}</div>
+                  <div className="text-gray-400 text-sm">{stat.label}</div>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>
 
-      {/* Projects Section */}
-      <section id="projects" className="py-20 bg-black relative">
+      {/* Enhanced Services Section */}
+      <section id="services" className="py-20 bg-gradient-to-b from-gray-950/50 to-black relative z-10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-black mb-4 text-white">PROJECTS</h2>
-            <p className="text-xl text-gray-400">Recent work and case studies</p>
+            <div className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-500/10 border border-blue-500/30 rounded-full mb-6">
+              <Zap className="w-5 h-5 text-blue-400" />
+              <span className="text-blue-400 font-medium">What I Offer</span>
+            </div>
+            <h2 className="text-5xl md:text-6xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100">
+              SERVICES
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+              Comprehensive solutions to bring your digital vision to life with cutting-edge technology and design
+            </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3, 4, 5, 6].map((project) => (
-              <div
-                key={project}
-                className="group bg-gray-950 border border-gray-800 hover:border-white hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2"
-              >
-                <div className="h-48 bg-gradient-to-br from-gray-900 to-gray-800 group-hover:from-gray-800 group-hover:to-gray-700 transition-all duration-300 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_40%,rgba(255,255,255,0.05)_50%,transparent_60%)] bg-[size:30px_30px] animate-pulse"></div>
+            {services.map((service, index) => {
+              const IconComponent = service.icon
+              return (
+                <div
+                  key={index}
+                  className={`group relative ${service.bgColor} backdrop-blur-xl border ${service.borderColor} rounded-3xl p-8 hover:scale-105 transition-all duration-300 cursor-pointer overflow-hidden`}
+                >
+                  {/* Background Effects */}
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+                  ></div>
+                  <div
+                    className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${service.color} scale-x-0 group-hover:scale-x-100 transition-transform duration-300`}
+                  ></div>
+
+                  <div className="relative z-10">
+                    {/* Enhanced Icon */}
+                    <div
+                      className={`w-16 h-16 bg-gradient-to-br ${service.color} rounded-2xl flex items-center justify-center shadow-2xl mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}
+                    >
+                      <IconComponent className="w-8 h-8 text-white" />
+                    </div>
+
+                    {/* Content */}
+                    <h3 className="text-xl font-bold mb-4 text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all duration-300">
+                      {service.title}
+                    </h3>
+                    <p className="text-gray-400 group-hover:text-gray-200 transition-colors duration-300 mb-6 leading-relaxed">
+                      {service.desc}
+                    </p>
+
+                    {/* Enhanced CTA */}
+                    <div className="flex items-center space-x-2 text-gray-500 group-hover:text-blue-400 transition-colors duration-300">
+                      <span className="font-medium">Learn More</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                    </div>
+                  </div>
+
+                  {/* Floating Particles */}
+                  <div className="absolute top-4 right-4 w-2 h-2 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-300"></div>
+                  <div className="absolute bottom-4 left-4 w-1.5 h-1.5 bg-purple-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-pulse transition-opacity duration-300 delay-150"></div>
                 </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Enhanced Projects Section */}
+      <section id="projects" className="py-20 bg-black relative z-10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center space-x-2 px-6 py-3 bg-purple-500/10 border border-purple-500/30 rounded-full mb-6">
+              <Code className="w-5 h-5 text-purple-400" />
+              <span className="text-purple-400 font-medium">Featured Work</span>
+            </div>
+            <h2 className="text-5xl md:text-6xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-100 to-pink-100">
+              PROJECTS
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+              Recent work and case studies showcasing real-world solutions and innovative approaches
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featuredProjects.map((project, index) => (
+              <div
+                key={index}
+                className="group bg-gray-900/50 backdrop-blur-xl border border-gray-800/50 hover:border-purple-500/50 hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2 rounded-3xl"
+              >
+                {/* Enhanced Project Image */}
+                <div
+                  className={`h-48 bg-gradient-to-br ${project.gradient} opacity-20 group-hover:opacity-30 transition-all duration-300 relative overflow-hidden`}
+                >
+                  <div className="absolute inset-0 bg-black/40"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-6xl opacity-60 group-hover:opacity-80 transition-opacity duration-300">💻</div>
+                  </div>
+                  <div className="absolute top-4 right-4">
+                    <TrendingUp className="w-6 h-6 text-white opacity-60" />
+                  </div>
+                  <div className="absolute bottom-4 left-4">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-white rounded-full opacity-60"></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full opacity-80"></div>
+                      <div className="w-2 h-2 bg-purple-400 rounded-full opacity-60"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Enhanced Content */}
                 <div className="p-6">
-                  <h3 className="text-xl font-bold mb-3 text-white group-hover:text-blue-400 transition-colors duration-300">
-                    Project {project}
+                  <h3 className="text-xl font-bold mb-3 text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">
+                    {project.title}
                   </h3>
-                  <p className="text-gray-400 mb-4 group-hover:text-gray-200 transition-colors duration-300">
-                    Description of the project and technologies used in development.
+                  <p className="text-gray-400 mb-4 group-hover:text-gray-200 transition-colors duration-300 leading-relaxed">
+                    {project.desc}
                   </p>
-                  <button className="text-white hover:text-blue-400 font-semibold transition-colors duration-300 flex items-center space-x-2">
-                    <span>View Details</span>
-                    <span className="transform group-hover:translate-x-1 transition-transform duration-300">→</span>
-                  </button>
+
+                  {/* Tech Stack */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {project.tech.map((tech, techIndex) => (
+                      <span
+                        key={techIndex}
+                        className="px-3 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded-full group-hover:border-gray-600/50 group-hover:text-white transition-all duration-300"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Enhanced CTA */}
+                  <div className="flex items-center justify-between">
+                    <button className="text-white hover:text-purple-400 font-semibold transition-colors duration-300 flex items-center space-x-2 group/btn">
+                      <span>View Details</span>
+                      <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                    </button>
+                    <div className="flex space-x-1">
+                      <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse"></div>
+                      <div className="w-1.5 h-1.5 bg-pink-500 rounded-full animate-pulse delay-100"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse delay-200"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
+
+          <div className="text-center mt-12">
+            <Link
+              href="/projects"
+              className="inline-flex items-center space-x-2 border-2 border-purple-500 hover:bg-purple-500 hover:text-white text-purple-400 px-8 py-3 rounded-xl font-medium transition-all duration-300 hover:scale-105 shadow-lg"
+            >
+              <span>View All Projects</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Store Section */}
-      <section id="store" className="py-20 bg-white text-black relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(30,64,175,0.1),transparent_70%)]"></div>
-        <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
-          <h2 className="text-5xl font-black mb-6">STORE</h2>
-          <p className="text-xl text-gray-700 mb-8">Digital products and resources</p>
-          <button className="bg-black text-white hover:bg-gray-800 px-10 py-4 font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-            Browse Products
-          </button>
+      {/* Enhanced Quick Links */}
+      <section className="py-20 bg-gray-950/50 backdrop-blur-sm relative z-10">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-white mb-4">Explore More</h2>
+            <p className="text-gray-400">Discover additional resources and ways to connect</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Store */}
+            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-2xl p-8 text-center group hover:scale-105 transition-all duration-300 cursor-pointer">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <ShoppingCart className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">STORE</h3>
+              <p className="text-gray-400 mb-6 leading-relaxed">
+                Premium digital products, templates, and source codes
+              </p>
+              <Link
+                href="/store"
+                className="inline-flex items-center space-x-2 text-blue-400 hover:text-white font-medium transition-colors duration-300"
+              >
+                <span>Browse Products</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {/* Blog */}
+            <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-2xl p-8 text-center group hover:scale-105 transition-all duration-300 cursor-pointer">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Brain className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">BLOG</h3>
+              <p className="text-gray-400 mb-6 leading-relaxed">Tech insights, tutorials, and development stories</p>
+              <Link
+                href="/blog"
+                className="inline-flex items-center space-x-2 text-green-400 hover:text-white font-medium transition-colors duration-300"
+              >
+                <span>Read Articles</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {/* Contact */}
+            <div className="bg-gradient-to-br from-pink-500/10 to-rose-500/10 border border-pink-500/30 rounded-2xl p-8 text-center group hover:scale-105 transition-all duration-300 cursor-pointer">
+              <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Sparkles className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">CONTACT</h3>
+              <p className="text-gray-400 mb-6 leading-relaxed">Let's collaborate and build something amazing</p>
+              <Link
+                href="/contact"
+                className="inline-flex items-center space-x-2 text-pink-400 hover:text-white font-medium transition-colors duration-300"
+              >
+                <span>Get In Touch</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Blog Section */}
-      <section id="blog" className="py-20 bg-gray-950 relative">
+      {/* Enhanced Final CTA */}
+      <section className="py-20 bg-black relative z-10">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-5xl font-black mb-6 text-white">BLOG</h2>
-          <p className="text-xl text-gray-400 mb-8">Thoughts on development and technology</p>
-          <button className="border-2 border-white hover:bg-white hover:text-black text-white px-10 py-4 font-bold text-lg transition-all duration-300 hover:scale-105">
-            Read Articles
-          </button>
-        </div>
-      </section>
+          <div className="bg-gradient-to-r from-gray-900/60 to-gray-800/60 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-12 relative overflow-hidden">
+            {/* Background Effects */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
 
-      {/* Contact Section */}
-      <section id="contact" className="py-20 bg-black relative">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-5xl font-black mb-6 text-white">CONTACT</h2>
-          <p className="text-xl text-gray-400 mb-8">Let's work together on your next project</p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <button className="bg-white hover:bg-gray-200 text-black px-10 py-4 font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-              Get In Touch
-            </button>
-            <button className="border-2 border-white hover:bg-white hover:text-black text-white px-10 py-4 font-bold text-lg transition-all duration-300 hover:scale-105">
-              Download Resume
-            </button>
+            <div className="relative z-10">
+              <h2 className="text-4xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100">
+                Ready to Build Something Amazing?
+              </h2>
+              <p className="text-gray-400 mb-8 max-w-2xl mx-auto text-lg leading-relaxed">
+                Transform your ideas into powerful digital solutions. Let's create something extraordinary together and
+                make your vision a reality.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                <Link
+                  href="/hire"
+                  className="bg-white hover:bg-gray-200 text-black px-10 py-4 font-bold text-lg rounded-xl transition-all duration-300 hover:scale-105 shadow-lg flex items-center space-x-2"
+                >
+                  <Rocket className="w-5 h-5" />
+                  <span>Hire Me</span>
+                </Link>
+                <Link
+                  href="/contact"
+                  className="border-2 border-white hover:bg-white hover:text-black text-white px-10 py-4 font-bold text-lg rounded-xl transition-all duration-300 hover:scale-105 flex items-center space-x-2"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  <span>Get In Touch</span>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>

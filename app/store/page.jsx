@@ -4,8 +4,29 @@ import { useState } from "react"
 import Navbar from "../../components/navbar.jsx"
 import Footer from "../../components/footer.jsx"
 import InteractiveBackground from "../../components/interactive-background"
-import ProductCard from "../../components/product-card.jsx"
 import Link from "next/link"
+import {
+  ShoppingBag,
+  Code,
+  Filter,
+  Search,
+  ArrowRight,
+  Star,
+  Users,
+  Download,
+  CreditCard,
+  Layers,
+  Globe,
+  Palette,
+  Database,
+  CheckCircle,
+  Heart,
+  Gift,
+  Package,
+  Rocket,
+  MessageSquare,
+  Briefcase,
+} from "lucide-react"
 
 const StorePage = () => {
   const [selectedFilter, setSelectedFilter] = useState("all")
@@ -23,6 +44,12 @@ const StorePage = () => {
       category: "template",
       isPopular: true,
       thumbnail: "/placeholder.svg?height=200&width=300",
+      gradient: "from-purple-500 via-pink-500 to-rose-500",
+      icon: CreditCard,
+      features: ["AI Insights", "Real-time Tracking", "Smart Analytics", "Export Data"],
+      downloads: "500+",
+      rating: 4.9,
+      complexity: "Advanced",
     },
     {
       id: "clubsphere-admin",
@@ -33,6 +60,12 @@ const StorePage = () => {
       price: 499,
       category: "template",
       thumbnail: "/placeholder.svg?height=200&width=300",
+      gradient: "from-blue-500 via-purple-500 to-pink-500",
+      icon: Users,
+      features: ["Event Management", "Member Portal", "Analytics", "Payment Integration"],
+      downloads: "300+",
+      rating: 4.8,
+      complexity: "Intermediate",
     },
     {
       id: "hospital-chatbot",
@@ -43,6 +76,12 @@ const StorePage = () => {
       price: 699,
       category: "template",
       thumbnail: "/placeholder.svg?height=200&width=300",
+      gradient: "from-cyan-500 via-blue-500 to-indigo-500",
+      icon: MessageSquare,
+      features: ["Multilingual Support", "AI Processing", "Appointment System", "Medical Database"],
+      downloads: "200+",
+      rating: 4.7,
+      complexity: "Advanced",
     },
     {
       id: "tailwind-ui-kit",
@@ -53,6 +92,12 @@ const StorePage = () => {
       price: 199,
       category: "ui-kit",
       thumbnail: "/placeholder.svg?height=200&width=300",
+      gradient: "from-green-500 via-emerald-500 to-teal-500",
+      icon: Palette,
+      features: ["50+ Components", "TypeScript Support", "Dark Mode", "Responsive Design"],
+      downloads: "800+",
+      rating: 4.9,
+      complexity: "Beginner",
     },
     {
       id: "dark-portfolio-template",
@@ -63,6 +108,12 @@ const StorePage = () => {
       price: 299,
       category: "template",
       thumbnail: "/placeholder.svg?height=200&width=300",
+      gradient: "from-gray-500 via-gray-600 to-gray-700",
+      icon: Globe,
+      features: ["Interactive Animations", "Dark Theme", "SEO Optimized", "Mobile First"],
+      downloads: "600+",
+      rating: 4.8,
+      complexity: "Intermediate",
     },
     {
       id: "church-ministry-template",
@@ -74,21 +125,72 @@ const StorePage = () => {
       isFree: true,
       category: "template",
       thumbnail: "/placeholder.svg?height=200&width=300",
+      gradient: "from-orange-500 via-red-500 to-pink-500",
+      icon: Heart,
+      features: ["Event Management", "Donation System", "Media Gallery", "Member Portal"],
+      downloads: "1.2k+",
+      rating: 4.9,
+      complexity: "Intermediate",
     },
   ]
 
   const categories = [
-    { id: "all", name: "All Products" },
-    { id: "template", name: "Templates" },
-    { id: "ui-kit", name: "UI Kits" },
-    { id: "tools", name: "Tools" },
+    { id: "all", name: "All Products", count: products.length, icon: Package, color: "from-gray-500 to-gray-600" },
+    { id: "template", name: "Templates", count: 5, icon: Code, color: "from-blue-500 to-purple-500" },
+    { id: "ui-kit", name: "UI Kits", count: 1, icon: Palette, color: "from-green-500 to-emerald-500" },
+    { id: "tools", name: "Tools", count: 0, icon: Database, color: "from-orange-500 to-red-500" },
   ]
 
   const filters = [
-    { id: "all", name: "All" },
-    { id: "free", name: "Free" },
-    { id: "paid", name: "Paid" },
+    { id: "all", name: "All", icon: Layers, color: "from-gray-500 to-gray-600" },
+    { id: "free", name: "Free", icon: Gift, color: "from-green-500 to-emerald-500" },
+    { id: "paid", name: "Paid", icon: CreditCard, color: "from-blue-500 to-purple-500" },
   ]
+
+  const stats = [
+    {
+      title: "Total Products",
+      value: "25+",
+      icon: Package,
+      color: "text-blue-400",
+      bgColor: "bg-blue-500/10",
+      borderColor: "border-blue-500/30",
+      description: "Digital products available",
+    },
+    {
+      title: "Happy Customers",
+      value: "500+",
+      icon: Users,
+      color: "text-green-400",
+      bgColor: "bg-green-500/10",
+      borderColor: "border-green-500/30",
+      description: "Satisfied buyers worldwide",
+    },
+    {
+      title: "Total Downloads",
+      value: "5k+",
+      icon: Download,
+      color: "text-purple-400",
+      bgColor: "bg-purple-500/10",
+      borderColor: "border-purple-500/30",
+      description: "Products downloaded",
+    },
+    {
+      title: "Average Rating",
+      value: "4.8★",
+      icon: Star,
+      color: "text-yellow-400",
+      bgColor: "bg-yellow-500/10",
+      borderColor: "border-yellow-500/30",
+      description: "Customer satisfaction",
+    },
+  ]
+
+  const complexityColors = {
+    Beginner: "text-green-400 bg-green-500/10 border-green-500/30",
+    Intermediate: "text-yellow-400 bg-yellow-500/10 border-yellow-500/30",
+    Advanced: "text-red-400 bg-red-500/10 border-red-500/30",
+  }
 
   const filteredProducts = products.filter((product) => {
     const categoryMatch = selectedCategory === "all" || product.category === selectedCategory
@@ -104,106 +206,392 @@ const StorePage = () => {
     <div className="min-h-screen bg-black text-white relative">
       <InteractiveBackground />
       <Navbar />
+      <br />
+      {/* Enhanced Hero Section */}
+      <section className="pt-24 pb-12 relative z-10">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Hero Content */}
+          <div className="text-center mb-12">
+            {/* Animated Badge */}
+            <div className="mb-6">
+              <div className="inline-flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-xl border border-gray-700/50 shadow-2xl">
+                <div className="relative">
+                  <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse"></div>
+                  <div className="absolute inset-0 w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-ping opacity-20"></div>
+                </div>
+                <ShoppingBag className="w-4 h-4 text-blue-400" />
+                <span className="text-gray-300 font-medium">Digital Marketplace</span>
+                <div className="w-px h-4 bg-gray-600"></div>
+                <span className="text-blue-400 font-bold text-sm">Premium Collection</span>
+              </div>
+            </div>
+            <br />
+            {/* Main Title with Animation */}
+            <div className="mb-6">
+              <h1 className="font-black leading-none">
+                <div className="relative mb-4">
+                  <span className="text-5xl md:text-6xl lg:text-7xl text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100 drop-shadow-2xl">
+                    ASCENDRY STORE
+                  </span>
+                  <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 blur-2xl opacity-60 animate-pulse"></div>
+                </div>
+                <div className="text-lg md:text-xl text-gray-400 font-medium">
+                  Premium Digital{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                    Solutions
+                  </span>
+                </div>
+              </h1>
+            </div>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 relative">
-        {/* Geometric Shapes */}
-        <div className="absolute top-20 left-10 w-20 h-20 border-2 border-white/10 rotate-45 animate-spin-slow"></div>
-        <div className="absolute top-40 right-20 w-16 h-16 bg-white/5 rotate-12 animate-pulse"></div>
-        <div className="absolute bottom-10 left-1/4 w-12 h-12 border border-blue-900/40 rounded-full animate-bounce"></div>
+            {/* Enhanced Description */}
+            <p className="text-lg md:text-xl text-gray-400 mb-8 max-w-4xl mx-auto leading-relaxed">
+              Discover premium templates, UI kits, and digital tools crafted with modern technologies. Each product
+              includes source code, documentation, and lifetime updates.
+            </p>
 
-        <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
-          <div className="mb-8">
-            <div className="inline-flex items-center space-x-2 px-6 py-3 bg-gray-900 rounded-full border border-gray-800 mb-8">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span className="text-gray-300 font-medium">Digital Marketplace</span>
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <button className="group relative bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-3 font-bold text-base transition-all duration-300 hover:scale-105 hover:shadow-2xl rounded-xl overflow-hidden">
+                <span className="relative z-10 flex items-center space-x-2">
+                  <Filter className="w-4 h-4" />
+                  <span>Filter Products</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              </button>
+
+              <button className="group border-2 border-white hover:bg-white hover:text-black text-white px-8 py-3 font-bold text-base transition-all duration-300 hover:scale-105 rounded-xl flex items-center space-x-2">
+                <Search className="w-4 h-4" />
+                <span>Search Store</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+              </button>
             </div>
           </div>
 
-          <h1 className="text-6xl md:text-8xl font-black mb-8 relative">
-            <span className="text-white">ASCENDRY</span>
-            <br />
-            <span className="text-blue-500">STORE</span>
-          </h1>
+          {/* Enhanced Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {stats.map((stat, index) => {
+              const IconComponent = stat.icon
+              return (
+                <div
+                  key={index}
+                  className={`group relative ${stat.bgColor} backdrop-blur-xl border ${stat.borderColor} rounded-2xl p-6 hover:scale-105 transition-all duration-300 cursor-pointer overflow-hidden`}
+                >
+                  {/* Background Glow */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-          <p className="text-xl md:text-2xl text-gray-400 mb-12 max-w-4xl mx-auto leading-relaxed">
-            Premium digital tools, templates, and source codes crafted for developers & creators.
-          </p>
+                  <div className="relative z-10 text-center">
+                    <div className="w-12 h-12 bg-gray-900/50 border border-gray-700/50 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                      <IconComponent className={`w-6 h-6 ${stat.color}`} />
+                    </div>
+                    <div className="text-2xl font-black text-white mb-1">{stat.value}</div>
+                    <div className="text-sm font-bold text-white mb-1">{stat.title}</div>
+                    <div className="text-gray-400 text-xs">{stat.description}</div>
+                  </div>
 
-          <button className="group bg-white hover:bg-gray-200 text-black px-10 py-4 font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl relative overflow-hidden">
-            <span className="relative z-10">Explore Products</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-          </button>
+                  {/* Floating Elements */}
+                  <div className="absolute top-3 right-3 w-1.5 h-1.5 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-300"></div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       </section>
 
-      {/* Filters Section */}
-      <section className="py-10 bg-gray-950 border-y border-gray-800">
+      {/* Enhanced Filters Section */}
+      <section className="py-12 bg-gradient-to-b from-gray-950/30 to-transparent relative z-10">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-full mb-4">
+              <Filter className="w-4 h-4 text-blue-400" />
+              <span className="text-blue-400 font-medium text-sm">Browse & Filter</span>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-black mb-3 text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100">
+              FIND YOUR PERFECT SOLUTION
+            </h2>
+            <p className="text-gray-400">Explore products by category and pricing</p>
+          </div>
+
+          <div className="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0">
             {/* Categories */}
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-400 font-medium">Categories:</span>
-              <div className="flex space-x-2">
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                      selectedCategory === category.id
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white"
-                    }`}
-                  >
-                    {category.name}
-                  </button>
-                ))}
+            <div className="flex flex-col items-center">
+              <span className="text-gray-400 font-medium mb-3 text-sm">Categories:</span>
+              <div className="flex flex-wrap gap-3 justify-center">
+                {categories.map((category) => {
+                  const IconComponent = category.icon
+                  return (
+                    <button
+                      key={category.id}
+                      onClick={() => setSelectedCategory(category.id)}
+                      className={`group relative backdrop-blur-xl border rounded-xl px-4 py-3 transition-all duration-300 hover:scale-105 overflow-hidden ${
+                        selectedCategory === category.id
+                          ? "bg-blue-500/20 border-blue-500/50 text-white"
+                          : "bg-gray-900/50 border-gray-700/50 text-gray-300 hover:border-gray-600/50"
+                      }`}
+                    >
+                      {/* Background Gradient */}
+                      <div
+                        className={`absolute inset-0 bg-gradient-to-r ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+                      ></div>
+
+                      <div className="relative z-10 flex items-center space-x-2">
+                        <div
+                          className={`w-8 h-8 bg-gradient-to-r ${category.color} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+                        >
+                          <IconComponent className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="text-left">
+                          <div className="font-bold text-sm">{category.name}</div>
+                          <div className="text-gray-400 text-xs">{category.count} items</div>
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
             {/* Price Filters */}
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-400 font-medium">Filter:</span>
-              <div className="flex space-x-2">
-                {filters.map((filter) => (
-                  <button
-                    key={filter.id}
-                    onClick={() => setSelectedFilter(filter.id)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                      selectedFilter === filter.id
-                        ? "bg-white text-black"
-                        : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white"
-                    }`}
-                  >
-                    {filter.name}
-                  </button>
-                ))}
+            <div className="flex flex-col items-center">
+              <span className="text-gray-400 font-medium mb-3 text-sm">Price Filter:</span>
+              <div className="flex flex-wrap gap-3 justify-center">
+                {filters.map((filter) => {
+                  const IconComponent = filter.icon
+                  return (
+                    <button
+                      key={filter.id}
+                      onClick={() => setSelectedFilter(filter.id)}
+                      className={`group relative backdrop-blur-xl border rounded-xl px-4 py-3 transition-all duration-300 hover:scale-105 overflow-hidden ${
+                        selectedFilter === filter.id
+                          ? "bg-purple-500/20 border-purple-500/50 text-white"
+                          : "bg-gray-900/50 border-gray-700/50 text-gray-300 hover:border-gray-600/50"
+                      }`}
+                    >
+                      {/* Background Gradient */}
+                      <div
+                        className={`absolute inset-0 bg-gradient-to-r ${filter.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+                      ></div>
+
+                      <div className="relative z-10 flex items-center space-x-2">
+                        <div
+                          className={`w-8 h-8 bg-gradient-to-r ${filter.color} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+                        >
+                          <IconComponent className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="font-bold text-sm">{filter.name}</span>
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Products Grid */}
-      <section className="py-20 bg-black relative">
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+      {/* Enhanced Products Grid */}
+      <section className="py-16 bg-black relative z-10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-purple-500/10 border border-purple-500/30 rounded-full mb-4">
+              <Package className="w-4 h-4 text-purple-400" />
+              <span className="text-purple-400 font-medium text-sm">Premium Products</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-100 to-pink-100">
+              DIGITAL MARKETPLACE
+            </h2>
+            <p className="text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed">
+              Each product is carefully crafted with modern technologies and includes comprehensive documentation
+            </p>
           </div>
 
+          {/* Enhanced Product Cards */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProducts.map((product) => {
+              const IconComponent = product.icon
+              return (
+                <div
+                  key={product.id}
+                  className="group relative bg-gradient-to-br from-gray-900/40 to-gray-800/40 backdrop-blur-xl border border-gray-700/30 hover:border-purple-500/50 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                >
+                  {/* Popular Badge */}
+                  {product.isPopular && (
+                    <div className="absolute top-4 right-4 z-20 bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                      <div className="flex items-center space-x-1">
+                        <Star className="w-3 h-3" />
+                        <span>POPULAR</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Background Gradient */}
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
+                  ></div>
+
+                  {/* Product Image */}
+                  <div className="relative h-48 overflow-hidden">
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-20 group-hover:opacity-30 transition-all duration-500`}
+                    ></div>
+                    <div className="absolute inset-0 bg-black/20"></div>
+
+                    {/* Product Icon */}
+                    <div className="absolute top-4 left-4">
+                      <div
+                        className={`w-12 h-12 bg-gradient-to-br ${product.gradient} rounded-xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300`}
+                      >
+                        <IconComponent className="w-6 h-6 text-white" />
+                      </div>
+                    </div>
+
+                    {/* Complexity Badge */}
+                    <div className="absolute top-4 left-20">
+                      <div
+                        className={`px-2 py-1 rounded-lg backdrop-blur-sm border text-xs font-medium ${complexityColors[product.complexity]}`}
+                      >
+                        {product.complexity}
+                      </div>
+                    </div>
+
+                    {/* Price Overlay */}
+                    <div className="absolute bottom-4 left-4">
+                      <div className="bg-black/80 backdrop-blur-sm px-3 py-2 rounded-xl border border-gray-700">
+                        {product.isFree ? (
+                          <span className="text-green-400 font-bold text-lg flex items-center space-x-1">
+                            <Gift className="w-4 h-4" />
+                            <span>FREE</span>
+                          </span>
+                        ) : (
+                          <div className="flex items-center space-x-2">
+                            <span className="text-white font-bold text-lg">₹{product.price}</span>
+                            {product.originalPrice && (
+                              <span className="text-gray-400 line-through text-sm">₹{product.originalPrice}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Rating & Downloads */}
+                    <div className="absolute bottom-4 right-4 flex flex-col space-y-2">
+                      <div className="bg-black/80 backdrop-blur-sm px-2 py-1 rounded-lg border border-gray-700">
+                        <div className="flex items-center space-x-1 text-yellow-400">
+                          <Star className="w-3 h-3 fill-current" />
+                          <span className="text-xs font-medium text-white">{product.rating}</span>
+                        </div>
+                      </div>
+                      <div className="bg-black/80 backdrop-blur-sm px-2 py-1 rounded-lg border border-gray-700">
+                        <div className="flex items-center space-x-1 text-blue-400">
+                          <Download className="w-3 h-3" />
+                          <span className="text-xs font-medium text-white">{product.downloads}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Placeholder Image */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-6xl opacity-40 group-hover:opacity-60 transition-opacity duration-300">
+                        🛍️
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Product Content */}
+                  <div className="p-6 relative z-10">
+                    <h3 className="text-xl font-bold mb-3 text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all duration-300">
+                      {product.title}
+                    </h3>
+
+                    <p className="text-gray-400 mb-4 group-hover:text-gray-200 transition-colors duration-300 line-clamp-3 leading-relaxed">
+                      {product.description}
+                    </p>
+
+                    {/* Features */}
+                    <div className="mb-4">
+                      <div className="text-gray-300 font-semibold mb-2 flex items-center space-x-2 text-sm">
+                        <CheckCircle className="w-3 h-3" />
+                        <span>Key Features</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {product.features.slice(0, 4).map((feature, idx) => (
+                          <div key={idx} className="flex items-center space-x-2">
+                            <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                            <span className="text-gray-400 text-xs group-hover:text-gray-200 transition-colors duration-300">
+                              {feature}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Tech Stack */}
+                    <div className="mb-6">
+                      <div className="text-gray-300 font-semibold mb-2 flex items-center space-x-2 text-sm">
+                        <Code className="w-3 h-3" />
+                        <span>Technologies</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {product.techStack.slice(0, 4).map((tech, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded-lg group-hover:border-gray-600/50 group-hover:text-white transition-all duration-300"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                        {product.techStack.length > 4 && (
+                          <span className="px-2 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded-lg">
+                            +{product.techStack.length - 4}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center space-x-3">
+                      <Link
+                        href={`/store/${product.id}`}
+                        className="flex-1 bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700/50 hover:border-gray-600/50 text-white px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 hover:scale-105 text-center"
+                      >
+                        View Details
+                      </Link>
+
+                      <Link
+                        href={`#buy-${product.id}`}
+                        className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300 hover:scale-105 text-center shadow-lg"
+                      >
+                        {product.isFree ? "Download" : "Buy Now"}
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Bottom Accent */}
+                  <div
+                    className={`absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r ${product.gradient} scale-x-0 group-hover:scale-x-100 transition-transform duration-500`}
+                  ></div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* No Products Found */}
           {filteredProducts.length === 0 && (
-            <div className="text-center py-20">
-              <div className="text-6xl mb-4 opacity-20">🔍</div>
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-gray-900/50 border border-gray-700/50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Search className="w-10 h-10 text-gray-400" />
+              </div>
               <h3 className="text-2xl font-bold text-white mb-4">No products found</h3>
-              <p className="text-gray-400 mb-8">Try adjusting your filters or check back later for new products.</p>
+              <p className="text-gray-400 mb-8 max-w-md mx-auto">
+                Try adjusting your filters or check back later for new products.
+              </p>
               <button
                 onClick={() => {
                   setSelectedFilter("all")
                   setSelectedCategory("all")
                 }}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300"
+                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:scale-105 shadow-lg"
               >
                 Clear Filters
               </button>
@@ -212,35 +600,69 @@ const StorePage = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-gray-950 relative">
-        <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
-          <div className="bg-black border border-gray-800 rounded-2xl p-12 relative overflow-hidden">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(30,64,175,0.1),transparent_70%)]"></div>
+      {/* Enhanced CTA Section */}
+      <section className="py-16 bg-gradient-to-b from-gray-950/50 to-black relative z-10">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <div className="relative bg-gradient-to-br from-gray-900/60 to-gray-800/60 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 lg:p-12 overflow-hidden">
+            {/* Background Effects */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+
+            {/* Floating Elements */}
+            <div className="absolute top-6 right-6 w-3 h-3 bg-blue-400 rounded-full opacity-20 animate-pulse"></div>
+            <div className="absolute bottom-6 left-6 w-2 h-2 bg-purple-400 rounded-full opacity-30 animate-bounce"></div>
 
             <div className="relative z-10">
-              <h2 className="text-4xl font-black mb-6 text-white">Want a Custom Version?</h2>
-              <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-                Need something tailored to your specific requirements? I can build it your way with custom features and
-                branding.
-              </p>
+              <div className="mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-2xl">
+                  <Rocket className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-3xl lg:text-4xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100">
+                  Need Something Custom?
+                </h2>
+                <p className="text-gray-400 mb-6 max-w-2xl mx-auto text-lg leading-relaxed">
+                  Don't see what you're looking for? Let's build it together! I create custom solutions tailored to your
+                  specific needs with modern technologies and best practices.
+                </p>
+              </div>
 
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href="#contact"
-                  className="group bg-white hover:bg-gray-200 text-black px-10 py-4 font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl relative overflow-hidden"
+                  href="/hire"
+                  className="group relative bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-3 font-bold text-base transition-all duration-300 hover:scale-105 hover:shadow-2xl rounded-xl overflow-hidden"
                 >
-                  <span className="relative z-10">Hire Me</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                  <span className="relative z-10 flex items-center space-x-2">
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Hire Me</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 </Link>
 
                 <Link
                   href="/services"
-                  className="border-2 border-white hover:bg-white hover:text-black text-white px-10 py-4 font-bold text-lg transition-all duration-300 hover:scale-105"
+                  className="group border-2 border-white hover:bg-white hover:text-black text-white px-8 py-3 font-bold text-base transition-all duration-300 hover:scale-105 rounded-xl flex items-center space-x-2"
                 >
-                  View Services
+                  <Briefcase className="w-4 h-4" />
+                  <span>View Services</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
+              </div>
+
+              {/* Additional Info */}
+              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div className="space-y-1">
+                  <div className="text-xl font-black text-blue-400">Free</div>
+                  <div className="text-gray-400 text-sm">Consultation</div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-xl font-black text-purple-400">Lifetime</div>
+                  <div className="text-gray-400 text-sm">Updates</div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-xl font-black text-pink-400">24/7</div>
+                  <div className="text-gray-400 text-sm">Support</div>
+                </div>
               </div>
             </div>
           </div>
