@@ -1,13 +1,8 @@
 import React from 'react'
 import UnderConstruction from "./Under-Construction/page"
 
-export const page = () => {
-  return (
-  <>
+export default function page(){
+  return(
     <UnderConstruction />
-  </>
-  )
+  );
 }
-
-
-export default page
