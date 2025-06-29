@@ -3,6 +3,7 @@
 import Navbar from "../../components/navbar.jsx"
 import Footer from "../../components/footer.jsx"
 import InteractiveBackground from "../../components/interactive-background"
+import ProjectCard from "../../components/project-card.jsx"
 import Link from "next/link"
 import {
   Briefcase,
@@ -14,21 +15,14 @@ import {
   Smartphone,
   CreditCard,
   ArrowRight,
-  ExternalLink,
-  Github,
-  Calendar,
-  Clock,
   Brain,
   Heart,
   Layers,
   ShoppingCart,
   Sparkles,
   Award,
-  TrendingUp,
   Filter,
   Search,
-  Play,
-  BookOpen,
   MessageSquare,
 } from "lucide-react"
 
@@ -266,23 +260,17 @@ const ProjectsPage = () => {
     },
   ]
 
-  const complexityColors = {
-    Medium: "text-yellow-400 bg-yellow-500/10 border-yellow-500/30",
-    High: "text-orange-400 bg-orange-500/10 border-orange-500/30",
-    "Very High": "text-red-400 bg-red-500/10 border-red-500/30",
-  }
-
   return (
     <div className="min-h-screen bg-black text-white relative">
       <InteractiveBackground />
       <Navbar />
-      <br /><br />
-      {/* Compact Hero Section */}
-      <section className="pt-24 pb-12 relative z-10">
+
+      {/* Hero Section */}
+      <section className="pt-28 pb-12 relative z-10">
         <div className="max-w-7xl mx-auto px-6">
           {/* Hero Content */}
           <div className="text-center mb-12">
-            {/* Compact Badge */}
+            {/* Badge */}
             <div className="mb-6">
               <div className="inline-flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-xl border border-gray-700/50 shadow-2xl">
                 <div className="relative">
@@ -290,39 +278,39 @@ const ProjectsPage = () => {
                   <div className="absolute inset-0 w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-ping opacity-20"></div>
                 </div>
                 <Sparkles className="w-4 h-4 text-blue-400" />
-                <span className="text-gray-300 font-medium">Featured Portfolio</span>
+                <span className="text-gray-300 font-medium text-sm">Featured Portfolio</span>
                 <div className="w-px h-4 bg-gray-600"></div>
                 <span className="text-blue-400 font-bold text-sm">2024 Collection</span>
               </div>
             </div>
 
-            {/* Compact Title */}
+            {/* Title */}
             <div className="mb-6">
-              <h1 className="font-black leading-none">
-                <div className="relative mb-4">
-                  <span className="text-5xl md:text-6xl lg:text-7xl text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100 drop-shadow-2xl">
+              <h1 className="font-black leading-none mb-4">
+                <div className="relative">
+                  <span className="text-4xl md:text-5xl lg:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100 drop-shadow-2xl">
                     PROJECTS
                   </span>
                   <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 blur-2xl opacity-60 animate-pulse"></div>
                 </div>
-                <div className="text-lg md:text-xl text-gray-400 font-medium">
-                  Where Innovation Meets{" "}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                    Excellence
-                  </span>
-                </div>
               </h1>
+              <div className="text-lg md:text-xl text-gray-400 font-medium">
+                Where Innovation Meets{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                  Excellence
+                </span>
+              </div>
             </div>
 
-            {/* Compact Description */}
-            <p className="text-lg md:text-xl text-gray-400 mb-8 max-w-4xl mx-auto leading-relaxed">
+            {/* Description */}
+            <p className="text-base md:text-lg text-gray-400 mb-8 max-w-4xl mx-auto leading-relaxed">
               Explore a curated collection of real-world solutions that showcase cutting-edge technology, innovative
               design, and measurable impact across diverse industries.
             </p>
 
-            {/* Compact Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <button className="group relative bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-3 font-bold text-base transition-all duration-300 hover:scale-105 hover:shadow-2xl rounded-xl overflow-hidden">
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
+              <button className="group relative bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-6 py-3 font-bold text-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl rounded-xl overflow-hidden">
                 <span className="relative z-10 flex items-center space-x-2">
                   <Filter className="w-4 h-4" />
                   <span>Filter Projects</span>
@@ -331,7 +319,7 @@ const ProjectsPage = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
               </button>
 
-              <button className="group border-2 border-white hover:bg-white hover:text-black text-white px-8 py-3 font-bold text-base transition-all duration-300 hover:scale-105 rounded-xl flex items-center space-x-2">
+              <button className="group border-2 border-white hover:bg-white hover:text-black text-white px-6 py-3 font-bold text-sm transition-all duration-300 hover:scale-105 rounded-xl flex items-center space-x-2">
                 <Search className="w-4 h-4" />
                 <span>Search Projects</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
@@ -339,7 +327,7 @@ const ProjectsPage = () => {
             </div>
           </div>
 
-          {/* Compact Stats Grid */}
+          {/* Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {stats.map((stat, index) => {
               const IconComponent = stat.icon
@@ -355,7 +343,7 @@ const ProjectsPage = () => {
                     <div className="w-12 h-12 bg-gray-900/50 border border-gray-700/50 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                       <IconComponent className={`w-6 h-6 ${stat.color}`} />
                     </div>
-                    <div className="text-2xl font-black text-white mb-1">{stat.value}</div>
+                    <div className="text-xl font-black text-white mb-1">{stat.value}</div>
                     <div className="text-sm font-bold text-white mb-1">{stat.title}</div>
                     <div className="text-gray-400 text-xs">{stat.description}</div>
                   </div>
@@ -369,7 +357,7 @@ const ProjectsPage = () => {
         </div>
       </section>
 
-      {/* Compact Categories Filter */}
+      {/* Categories Filter */}
       <section className="py-12 bg-gradient-to-b from-gray-950/30 to-transparent relative z-10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-8">
@@ -380,7 +368,7 @@ const ProjectsPage = () => {
             <h2 className="text-2xl md:text-3xl font-black mb-3 text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100">
               EXPLORE BY TYPE
             </h2>
-            <p className="text-gray-400">Discover projects across different domains and technologies</p>
+            <p className="text-gray-400 text-sm">Discover projects across different domains and technologies</p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-3">
@@ -418,7 +406,7 @@ const ProjectsPage = () => {
         </div>
       </section>
 
-      {/* Compact Projects Showcase */}
+      {/* Projects Showcase */}
       <section className="py-16 bg-black relative z-10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
@@ -426,196 +414,24 @@ const ProjectsPage = () => {
               <Rocket className="w-4 h-4 text-purple-400" />
               <span className="text-purple-400 font-medium text-sm">Featured Work</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-100 to-pink-100">
+            <h2 className="text-2xl md:text-3xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-100 to-pink-100">
               SHOWCASE
             </h2>
-            <p className="text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base text-gray-400 max-w-3xl mx-auto leading-relaxed">
               Each project represents a unique challenge solved with innovative technology and creative problem-solving
             </p>
           </div>
 
-          {/* Compact Projects Grid */}
-          <div className="space-y-8">
-            {projects.map((project, index) => {
-              const IconComponent = project.icon
-              const isEven = index % 2 === 0
-
-              return (
-                <div
-                  key={project.id}
-                  className={`group relative bg-gradient-to-br from-gray-900/40 to-gray-800/40 backdrop-blur-xl border border-gray-700/30 hover:border-purple-500/50 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500`}
-                >
-                  {/* Background Gradient */}
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-br ${project.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
-                  ></div>
-
-                  <div className={`grid lg:grid-cols-2 gap-0 ${isEven ? "" : "lg:grid-flow-col-dense"}`}>
-                    {/* Compact Project Image */}
-                    <div className={`relative h-64 lg:h-72 overflow-hidden ${isEven ? "" : "lg:order-2"}`}>
-                      <div
-                        className={`absolute inset-0 bg-gradient-to-br ${project.gradient} opacity-20 group-hover:opacity-30 transition-all duration-500`}
-                      ></div>
-                      <div className="absolute inset-0 bg-black/20"></div>
-
-                      {/* Project Icon */}
-                      <div className="absolute top-4 left-4">
-                        <div
-                          className={`w-12 h-12 bg-gradient-to-br ${project.gradient} rounded-xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300`}
-                        >
-                          <IconComponent className="w-6 h-6 text-white" />
-                        </div>
-                      </div>
-
-                      {/* Status & Complexity */}
-                      <div className="absolute top-4 right-4 flex flex-col space-y-2">
-                        <div className="bg-green-500/20 border border-green-500/30 px-2 py-1 rounded-lg backdrop-blur-sm">
-                          <span className="text-green-400 text-xs font-medium flex items-center space-x-1">
-                            <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
-                            <span>{project.status}</span>
-                          </span>
-                        </div>
-                        <div
-                          className={`px-2 py-1 rounded-lg backdrop-blur-sm border text-xs font-medium ${complexityColors[project.complexity]}`}
-                        >
-                          {project.complexity}
-                        </div>
-                      </div>
-
-                      {/* Year & Duration */}
-                      <div className="absolute bottom-4 left-4 flex space-x-2">
-                        <div className="bg-black/60 backdrop-blur-sm border border-gray-700/50 px-2 py-1 rounded-lg">
-                          <div className="flex items-center space-x-1 text-white">
-                            <Calendar className="w-3 h-3" />
-                            <span className="text-xs font-medium">{project.year}</span>
-                          </div>
-                        </div>
-                        <div className="bg-black/60 backdrop-blur-sm border border-gray-700/50 px-2 py-1 rounded-lg">
-                          <div className="flex items-center space-x-1 text-white">
-                            <Clock className="w-3 h-3" />
-                            <span className="text-xs font-medium">{project.duration}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Placeholder Image */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-6xl opacity-40 group-hover:opacity-60 transition-opacity duration-300">
-                          💻
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Compact Project Content */}
-                    <div className={`p-6 lg:p-8 flex flex-col justify-center ${isEven ? "" : "lg:order-1"}`}>
-                      <div className="space-y-4">
-                        {/* Category & Title */}
-                        <div>
-                          <div className="text-blue-400 font-semibold text-xs uppercase tracking-wider mb-1">
-                            {project.category}
-                          </div>
-                          <h3 className="text-2xl lg:text-3xl font-black text-white mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all duration-300">
-                            {project.title}
-                          </h3>
-                          <div className="text-base text-gray-400 font-medium mb-3">{project.subtitle}</div>
-                        </div>
-
-                        {/* Description */}
-                        <div className="space-y-2">
-                          <p className="text-gray-300 leading-relaxed">{project.description}</p>
-                          <p className="text-gray-400 text-sm leading-relaxed">{project.longDescription}</p>
-                        </div>
-
-                        {/* Impact */}
-                        <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl p-3">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <TrendingUp className="w-4 h-4 text-blue-400" />
-                            <span className="text-blue-400 font-semibold text-sm">Impact</span>
-                          </div>
-                          <p className="text-white font-medium text-sm">{project.impact}</p>
-                        </div>
-
-                        {/* Metrics */}
-                        <div className="grid grid-cols-3 gap-3">
-                          {Object.entries(project.metrics).map(([key, value], idx) => (
-                            <div key={idx} className="text-center">
-                              <div className="text-lg font-black text-white mb-1">{value}</div>
-                              <div className="text-gray-400 text-xs capitalize">{key}</div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Tech Stack */}
-                        <div>
-                          <div className="text-gray-300 font-semibold mb-2 flex items-center space-x-2 text-sm">
-                            <Code className="w-3 h-3" />
-                            <span>Technologies</span>
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {project.techStack.map((tech, techIndex) => (
-                              <span
-                                key={techIndex}
-                                className="px-2 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded-lg hover:border-gray-600/50 hover:text-white transition-all duration-300"
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex flex-wrap gap-3 pt-2">
-                          {project.liveUrl && (
-                            <Link
-                              href={project.liveUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="group flex items-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 hover:scale-105 shadow-lg"
-                            >
-                              <Play className="w-3 h-3" />
-                              <span>Live Demo</span>
-                              <ExternalLink className="w-3 h-3 group-hover:translate-x-1 transition-transform duration-300" />
-                            </Link>
-                          )}
-
-                          {project.githubUrl && (
-                            <Link
-                              href={project.githubUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="group flex items-center space-x-2 bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700/50 hover:border-gray-600/50 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 hover:scale-105"
-                            >
-                              <Github className="w-3 h-3" />
-                              <span>Source Code</span>
-                              <ExternalLink className="w-3 h-3 group-hover:translate-x-1 transition-transform duration-300" />
-                            </Link>
-                          )}
-
-                          <Link
-                            href={project.detailsUrl}
-                            className="group flex items-center space-x-2 border-2 border-white hover:bg-white hover:text-black text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 hover:scale-105"
-                          >
-                            <BookOpen className="w-3 h-3" />
-                            <span>Case Study</span>
-                            <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform duration-300" />
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bottom Accent */}
-                  <div
-                    className={`absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r ${project.gradient} scale-x-0 group-hover:scale-x-100 transition-transform duration-500`}
-                  ></div>
-                </div>
-              )
-            })}
+          {/* Projects Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {projects.map((project, index) => (
+              <ProjectCard key={project.id} project={project} />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Compact CTA Section */}
+      {/* CTA Section */}
       <section className="py-16 bg-gradient-to-b from-gray-950/50 to-black relative z-10">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <div className="relative bg-gradient-to-br from-gray-900/60 to-gray-800/60 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 lg:p-12 overflow-hidden">
@@ -632,19 +448,19 @@ const ProjectsPage = () => {
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-2xl">
                   <Rocket className="w-8 h-8 text-white" />
                 </div>
-                <h2 className="text-3xl lg:text-4xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100">
+                <h2 className="text-2xl lg:text-3xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100">
                   Ready to Build Something Extraordinary?
                 </h2>
-                <p className="text-gray-400 mb-6 max-w-2xl mx-auto text-lg leading-relaxed">
+                <p className="text-gray-400 mb-6 max-w-2xl mx-auto text-base leading-relaxed">
                   Let's collaborate to transform your vision into a powerful digital solution that drives real results
                   and creates lasting impact.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
                 <Link
                   href="/hire"
-                  className="group relative bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-3 font-bold text-base transition-all duration-300 hover:scale-105 hover:shadow-2xl rounded-xl overflow-hidden"
+                  className="group relative bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-6 py-3 font-bold text-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl rounded-xl overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center space-x-2">
                     <MessageSquare className="w-4 h-4" />
@@ -656,7 +472,7 @@ const ProjectsPage = () => {
 
                 <Link
                   href="/services"
-                  className="group border-2 border-white hover:bg-white hover:text-black text-white px-8 py-3 font-bold text-base transition-all duration-300 hover:scale-105 rounded-xl flex items-center space-x-2"
+                  className="group border-2 border-white hover:bg-white hover:text-black text-white px-6 py-3 font-bold text-sm transition-all duration-300 hover:scale-105 rounded-xl flex items-center space-x-2"
                 >
                   <Briefcase className="w-4 h-4" />
                   <span>View Services</span>
@@ -665,17 +481,17 @@ const ProjectsPage = () => {
               </div>
 
               {/* Additional Info */}
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 <div className="space-y-1">
-                  <div className="text-xl font-black text-blue-400">Free</div>
+                  <div className="text-lg font-black text-blue-400">Free</div>
                   <div className="text-gray-400 text-sm">Initial Consultation</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-xl font-black text-purple-400">24h</div>
+                  <div className="text-lg font-black text-purple-400">24h</div>
                   <div className="text-gray-400 text-sm">Response Time</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-xl font-black text-pink-400">100%</div>
+                  <div className="text-lg font-black text-pink-400">100%</div>
                   <div className="text-gray-400 text-sm">Satisfaction Guarantee</div>
                 </div>
               </div>

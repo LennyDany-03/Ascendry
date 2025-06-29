@@ -148,16 +148,16 @@ const BlogPage = () => {
         <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
           {/* Compact Welcome Badge */}
           <div className="mb-6">
-            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-6 group hover:border-blue-500/40 transition-all duration-300">
+            <div className="inline-flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-6 group hover:border-blue-500/40 transition-all duration-300">
               <div className="w-1.5 h-1.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-medium text-sm">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-medium text-xs">
                 Tech Insights & Stories
               </span>
             </div>
           </div>
 
           {/* Compact Main Heading */}
-          <h1 className="text-4xl md:text-6xl font-black mb-6 relative">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-6 relative">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-white">
               READ.
             </span>{" "}
@@ -169,7 +169,7 @@ const BlogPage = () => {
             </span>
           </h1>
 
-          <p className="text-lg text-gray-400 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base text-gray-400 mb-8 max-w-3xl mx-auto leading-relaxed">
             Dive deep into development insights, tutorials, and real-world project stories.
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
               Code smarter, build faster, grow stronger.
@@ -180,11 +180,11 @@ const BlogPage = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
             <button
               onClick={() => document.getElementById("featured-post")?.scrollIntoView({ behavior: "smooth" })}
-              className="group relative px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25"
+              className="group relative px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-              <span className="relative flex items-center space-x-2">
+              <span className="relative flex items-center space-x-2 text-sm">
                 <BookOpen className="w-4 h-4" />
                 <span>Read Featured</span>
               </span>
@@ -192,9 +192,9 @@ const BlogPage = () => {
 
             <button
               onClick={() => document.getElementById("all-posts")?.scrollIntoView({ behavior: "smooth" })}
-              className="group px-6 py-3 border border-gray-600 text-white font-semibold rounded-xl hover:border-blue-500 hover:bg-blue-500/10 transition-all duration-300 hover:scale-105"
+              className="group px-4 py-2 border border-gray-600 text-white font-semibold rounded-xl hover:border-blue-500 hover:bg-blue-500/10 transition-all duration-300 hover:scale-105"
             >
-              <span className="flex items-center space-x-2">
+              <span className="flex items-center space-x-2 text-sm">
                 <Filter className="w-4 h-4" />
                 <span>Browse All</span>
               </span>
@@ -202,7 +202,7 @@ const BlogPage = () => {
           </div>
 
           {/* Compact Stats Grid */}
-          <div className="grid grid-cols-4 gap-6 max-w-3xl mx-auto">
+          <div className="grid grid-cols-4 gap-4 max-w-3xl mx-auto">
             {[
               {
                 icon: BookOpen,
@@ -216,14 +216,14 @@ const BlogPage = () => {
             ].map((stat, index) => (
               <div
                 key={index}
-                className="group text-center p-4 rounded-xl bg-gradient-to-br from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300 hover:scale-105"
+                className="group text-center p-3 rounded-xl bg-gradient-to-br from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300 hover:scale-105"
               >
                 <div
-                  className={`w-8 h-8 mx-auto mb-3 rounded-lg bg-gradient-to-r ${stat.color} p-2 group-hover:rotate-12 transition-transform duration-300`}
+                  className={`w-6 h-6 mx-auto mb-2 rounded-lg bg-gradient-to-r ${stat.color} p-1 group-hover:rotate-12 transition-transform duration-300`}
                 >
                   <stat.icon className="w-full h-full text-white" />
                 </div>
-                <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 mb-1">
+                <div className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 mb-1">
                   {stat.number}
                 </div>
                 <div className="text-gray-400 text-xs group-hover:text-gray-300 transition-colors duration-300">
@@ -247,7 +247,7 @@ const BlogPage = () => {
                 Find Your Next Read
               </span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 mb-4">
+            <h2 className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 mb-4">
               Explore by Topic
             </h2>
           </div>
@@ -261,7 +261,7 @@ const BlogPage = () => {
                 placeholder="Search articles..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-gradient-to-r from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 text-white pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 focus:bg-gray-900/70 transition-all duration-300 placeholder-gray-400"
+                className="w-full bg-gradient-to-r from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 text-white pl-10 pr-4 py-2 rounded-xl focus:outline-none focus:border-blue-500/50 focus:bg-gray-900/70 transition-all duration-300 placeholder-gray-400 text-sm"
               />
             </div>
           </div>
@@ -272,7 +272,7 @@ const BlogPage = () => {
               <button
                 key={tag}
                 onClick={() => setSelectedTag(tag)}
-                className={`group px-4 py-2 rounded-xl font-medium transition-all duration-300 hover:scale-105 text-sm ${
+                className={`group px-3 py-2 rounded-xl font-medium transition-all duration-300 hover:scale-105 text-xs ${
                   selectedTag === tag
                     ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/25"
                     : "bg-gradient-to-r from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 text-gray-300 hover:border-gray-600/50 hover:text-white"
@@ -296,7 +296,7 @@ const BlogPage = () => {
                   Featured Article
                 </span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300">
+              <h2 className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300">
                 Latest Deep Dive
               </h2>
             </div>
@@ -305,7 +305,7 @@ const BlogPage = () => {
               <div className="group bg-gradient-to-br from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl overflow-hidden hover:border-gray-600/50 transition-all duration-500 hover:scale-[1.01] hover:shadow-xl hover:shadow-blue-500/10">
                 <div className="grid lg:grid-cols-2 gap-0">
                   {/* Compact Image */}
-                  <div className="relative h-48 lg:h-64 bg-gradient-to-br from-blue-500/20 to-purple-500/20 overflow-hidden">
+                  <div className="relative h-40 lg:h-48 bg-gradient-to-br from-blue-500/20 to-purple-500/20 overflow-hidden">
                     <img
                       src={featuredPost.thumbnail || "/placeholder.svg"}
                       alt={featuredPost.title}
@@ -313,29 +313,29 @@ const BlogPage = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-transparent to-purple-500/20 group-hover:opacity-80 transition-opacity duration-500"></div>
                     <div className="absolute top-4 left-4">
-                      <div className="px-3 py-1 bg-gradient-to-r from-pink-500 to-blue-500 text-white text-xs font-bold rounded-full">
+                      <div className="px-2 py-1 bg-gradient-to-r from-pink-500 to-blue-500 text-white text-xs font-bold rounded-full">
                         FEATURED
                       </div>
                     </div>
                   </div>
 
                   {/* Compact Content */}
-                  <div className="p-6 lg:p-8 flex flex-col justify-center">
-                    <div className="flex items-center space-x-3 mb-4 text-xs text-gray-400">
+                  <div className="p-4 lg:p-6 flex flex-col justify-center">
+                    <div className="flex items-center space-x-3 mb-3 text-xs text-gray-400">
                       <span>{new Date(featuredPost.date).toLocaleDateString()}</span>
                       <span>•</span>
                       <span>{featuredPost.readTime}</span>
                     </div>
 
-                    <h3 className="text-xl lg:text-2xl font-black text-white mb-4 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all duration-500 leading-tight">
+                    <h3 className="text-lg lg:text-xl font-black text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all duration-500 leading-tight">
                       {featuredPost.title}
                     </h3>
 
-                    <p className="text-gray-400 text-sm mb-6 leading-relaxed group-hover:text-gray-300 transition-colors duration-300 line-clamp-3">
+                    <p className="text-gray-400 text-sm mb-4 leading-relaxed group-hover:text-gray-300 transition-colors duration-300 line-clamp-3">
                       {featuredPost.excerpt}
                     </p>
 
-                    <div className="flex flex-wrap gap-1.5 mb-6">
+                    <div className="flex flex-wrap gap-1 mb-4">
                       {featuredPost.tags.slice(0, 3).map((tag, index) => (
                         <span
                           key={index}
@@ -348,7 +348,7 @@ const BlogPage = () => {
 
                     <a
                       href={`/blog/${featuredPost.id}`}
-                      className="group/btn relative px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 inline-flex items-center justify-center"
+                      className="group/btn relative px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 inline-flex items-center justify-center"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
                       <span className="relative text-sm">Read Full Article</span>
@@ -371,7 +371,7 @@ const BlogPage = () => {
                 All Articles
               </span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 mb-4">
+            <h2 className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 mb-4">
               Knowledge Base
             </h2>
             <p className="text-sm text-gray-400">
@@ -389,10 +389,10 @@ const BlogPage = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center">
-                <Search className="w-8 h-8 text-gray-400" />
+              <div className="w-12 h-12 mx-auto mb-6 rounded-full bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center">
+                <Search className="w-6 h-6 text-gray-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">No posts found</h3>
+              <h3 className="text-lg font-bold text-white mb-3">No posts found</h3>
               <p className="text-gray-400 mb-6 text-sm max-w-md mx-auto">
                 Try adjusting your search terms or selecting a different category.
               </p>
@@ -423,16 +423,16 @@ const BlogPage = () => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05),transparent_70%)]"></div>
 
         <div className="max-w-3xl mx-auto px-6 text-center relative z-10">
-          <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 relative overflow-hidden group hover:border-gray-600/50 transition-all duration-500">
+          <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 relative overflow-hidden group hover:border-gray-600/50 transition-all duration-500">
             <div className="relative z-10">
-              <div className="inline-flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-6">
+              <div className="inline-flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-4">
                 <div className="w-1.5 h-1.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-medium text-xs">
                   Stay Updated
                 </span>
               </div>
 
-              <h2 className="text-2xl md:text-3xl font-black mb-4">
+              <h2 className="text-xl md:text-2xl font-black mb-4">
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300">
                   Never Miss
                 </span>{" "}
@@ -441,22 +441,22 @@ const BlogPage = () => {
                 </span>
               </h2>
 
-              <p className="text-gray-400 mb-8 max-w-xl mx-auto leading-relaxed">
+              <p className="text-gray-400 mb-6 max-w-xl mx-auto leading-relaxed text-sm">
                 Get the latest tech insights and tutorials delivered to your inbox.
-                <span className="block mt-1 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 text-sm">
+                <span className="block mt-1 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 text-xs">
                   Join 10,000+ developers already subscribed.
                 </span>
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto mb-6">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto mb-4">
                 <div className="relative flex-1 group/input">
                   <input
                     type="email"
                     placeholder="Enter your email"
-                    className="w-full bg-gradient-to-r from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 focus:bg-gray-900/70 transition-all duration-300 placeholder-gray-400 text-sm"
+                    className="w-full bg-gradient-to-r from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 text-white px-3 py-2 rounded-xl focus:outline-none focus:border-blue-500/50 focus:bg-gray-900/70 transition-all duration-300 placeholder-gray-400 text-sm"
                   />
                 </div>
-                <button className="group/btn relative px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25">
+                <button className="group/btn relative px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25">
                   <span className="relative text-sm">Subscribe</span>
                 </button>
               </div>

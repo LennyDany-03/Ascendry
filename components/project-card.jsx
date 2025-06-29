@@ -1,113 +1,194 @@
 "use client"
 
 import Link from "next/link"
+import { ExternalLink, Github, Calendar, Clock, TrendingUp, Play, BookOpen, ArrowRight } from "lucide-react"
 
 const ProjectCard = ({ project }) => {
-  const { id, title, description, techStack = [], thumbnail, githubUrl, liveUrl, detailsUrl } = project
+  const {
+    id,
+    title,
+    subtitle,
+    description,
+    techStack = [],
+    thumbnail,
+    githubUrl,
+    liveUrl,
+    detailsUrl,
+    category,
+    status,
+    duration,
+    year,
+    gradient,
+    icon: IconComponent,
+    metrics,
+    complexity,
+    impact,
+  } = project
+
+  const complexityColors = {
+    Medium: "text-yellow-400 bg-yellow-500/10 border-yellow-500/30",
+    High: "text-orange-400 bg-orange-500/10 border-orange-500/30",
+    "Very High": "text-red-400 bg-red-500/10 border-red-500/30",
+  }
 
   return (
-    <div className="group bg-gray-950 border border-gray-800 hover:border-white hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2 relative">
-      {/* Hover Glow Effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+    <div className="group relative bg-gradient-to-br from-gray-900/40 to-gray-800/40 backdrop-blur-xl border border-gray-700/30 hover:border-purple-500/50 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+      {/* Background Gradient */}
+      <div
+        className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
+      ></div>
 
-      {/* Thumbnail */}
-      <div className="h-48 bg-gradient-to-br from-gray-900 to-gray-800 group-hover:from-gray-800 group-hover:to-gray-700 transition-all duration-300 relative overflow-hidden">
-        {thumbnail ? (
-          <img
-            src={thumbnail || "/placeholder.svg"}
-            alt={title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-6xl opacity-20 group-hover:opacity-30 transition-opacity duration-300">💻</div>
-            <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_40%,rgba(255,255,255,0.05)_50%,transparent_60%)] bg-[size:30px_30px] animate-pulse"></div>
+      {/* Project Image */}
+      <div className="relative h-48 overflow-hidden">
+        <div
+          className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-20 group-hover:opacity-30 transition-all duration-500`}
+        ></div>
+        <div className="absolute inset-0 bg-black/20"></div>
+
+        {/* Project Icon */}
+        <div className="absolute top-4 left-4">
+          <div
+            className={`w-10 h-10 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300`}
+          >
+            <IconComponent className="w-5 h-5 text-white" />
           </div>
-        )}
+        </div>
 
-        {/* Tech Stack Overlay */}
-        <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-          {techStack.slice(0, 3).map((tech, index) => (
-            <span
-              key={index}
-              className="px-2 py-1 bg-black/80 backdrop-blur-sm text-white text-xs font-medium rounded border border-gray-700"
-            >
-              {tech}
+        {/* Status & Complexity */}
+        <div className="absolute top-4 right-4 flex flex-col space-y-2">
+          <div className="bg-green-500/20 border border-green-500/30 px-2 py-1 rounded-lg backdrop-blur-sm">
+            <span className="text-green-400 text-xs font-medium flex items-center space-x-1">
+              <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
+              <span>{status}</span>
             </span>
-          ))}
-          {techStack.length > 3 && (
-            <span className="px-2 py-1 bg-black/80 backdrop-blur-sm text-white text-xs font-medium rounded border border-gray-700">
-              +{techStack.length - 3}
-            </span>
-          )}
+          </div>
+          <div
+            className={`px-2 py-1 rounded-lg backdrop-blur-sm border text-xs font-medium ${complexityColors[complexity]}`}
+          >
+            {complexity}
+          </div>
+        </div>
+
+        {/* Year & Duration */}
+        <div className="absolute bottom-4 left-4 flex space-x-2">
+          <div className="bg-black/60 backdrop-blur-sm border border-gray-700/50 px-2 py-1 rounded-lg">
+            <div className="flex items-center space-x-1 text-white">
+              <Calendar className="w-3 h-3" />
+              <span className="text-xs font-medium">{year}</span>
+            </div>
+          </div>
+          <div className="bg-black/60 backdrop-blur-sm border border-gray-700/50 px-2 py-1 rounded-lg">
+            <div className="flex items-center space-x-1 text-white">
+              <Clock className="w-3 h-3" />
+              <span className="text-xs font-medium">{duration}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Placeholder Image */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-4xl opacity-40 group-hover:opacity-60 transition-opacity duration-300">💻</div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-6 relative z-10">
-        <h3 className="text-xl font-bold mb-3 text-white group-hover:text-blue-400 transition-colors duration-300">
-          {title}
-        </h3>
+      <div className="p-6">
+        {/* Category & Title */}
+        <div className="mb-4">
+          <div className="text-blue-400 font-semibold text-xs uppercase tracking-wider mb-1">{category}</div>
+          <h3 className="text-xl font-black text-white mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all duration-300">
+            {title}
+          </h3>
+          <div className="text-sm text-gray-400 font-medium mb-2">{subtitle}</div>
+        </div>
 
-        <p className="text-gray-400 mb-6 group-hover:text-gray-200 transition-colors duration-300 line-clamp-3">
-          {description}
-        </p>
+        {/* Description */}
+        <p className="text-gray-300 text-sm leading-relaxed mb-4 line-clamp-3">{description}</p>
+
+        {/* Impact */}
+        <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl p-3 mb-4">
+          <div className="flex items-center space-x-2 mb-1">
+            <TrendingUp className="w-3 h-3 text-blue-400" />
+            <span className="text-blue-400 font-semibold text-xs">Impact</span>
+          </div>
+          <p className="text-white font-medium text-xs">{impact}</p>
+        </div>
+
+        {/* Metrics */}
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {Object.entries(metrics).map(([key, value], idx) => (
+            <div key={idx} className="text-center">
+              <div className="text-sm font-black text-white mb-1">{value}</div>
+              <div className="text-gray-400 text-xs capitalize">{key}</div>
+            </div>
+          ))}
+        </div>
 
         {/* Tech Stack */}
-        <div className="mb-6">
-          <div className="flex flex-wrap gap-2">
-            {techStack.map((tech, index) => (
+        <div className="mb-4">
+          <div className="text-gray-300 font-semibold mb-2 flex items-center space-x-2 text-xs">
+            <span>Technologies</span>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {techStack.slice(0, 4).map((tech, techIndex) => (
               <span
-                key={index}
-                className="px-3 py-1 bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-full group-hover:border-gray-600 group-hover:text-white transition-all duration-300"
+                key={techIndex}
+                className="px-2 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded-lg hover:border-gray-600/50 hover:text-white transition-all duration-300"
               >
                 {tech}
               </span>
             ))}
+            {techStack.length > 4 && (
+              <span className="px-2 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded-lg">
+                +{techStack.length - 4}
+              </span>
+            )}
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            {liveUrl && (
-              <Link
-                href={liveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white hover:text-blue-400 font-semibold transition-colors duration-300 flex items-center space-x-2 group/link"
-              >
-                <span>Live Demo</span>
-                <span className="transform group-hover/link:translate-x-1 transition-transform duration-300">↗</span>
-              </Link>
-            )}
-
-            {githubUrl && (
-              <Link
-                href={githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white font-semibold transition-colors duration-300 flex items-center space-x-2 group/link"
-              >
-                <span>GitHub</span>
-                <span className="transform group-hover/link:translate-x-1 transition-transform duration-300">↗</span>
-              </Link>
-            )}
-          </div>
-
-          {detailsUrl && (
+        <div className="flex flex-wrap gap-2">
+          {liveUrl && (
             <Link
-              href={detailsUrl}
-              className="bg-white/10 hover:bg-white hover:text-black text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105"
+              href={liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center space-x-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-300 hover:scale-105 shadow-lg"
             >
-              View Details
+              <Play className="w-3 h-3" />
+              <span>Live</span>
+              <ExternalLink className="w-3 h-3 group-hover:translate-x-1 transition-transform duration-300" />
             </Link>
           )}
+
+          {githubUrl && (
+            <Link
+              href={githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center space-x-1 bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700/50 hover:border-gray-600/50 text-white px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-300 hover:scale-105"
+            >
+              <Github className="w-3 h-3" />
+              <span>Code</span>
+              <ExternalLink className="w-3 h-3 group-hover:translate-x-1 transition-transform duration-300" />
+            </Link>
+          )}
+
+          <Link
+            href={detailsUrl}
+            className="group flex items-center space-x-1 border-2 border-white hover:bg-white hover:text-black text-white px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-300 hover:scale-105"
+          >
+            <BookOpen className="w-3 h-3" />
+            <span>Details</span>
+            <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform duration-300" />
+          </Link>
         </div>
       </div>
 
-      {/* Bottom Accent Line */}
-      <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+      {/* Bottom Accent */}
+      <div
+        className={`absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r ${gradient} scale-x-0 group-hover:scale-x-100 transition-transform duration-500`}
+      ></div>
     </div>
   )
 }

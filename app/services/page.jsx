@@ -151,33 +151,33 @@ const ServicesPage = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 relative z-10">
+      <section className="pt-32 pb-16 relative z-10">
         <div className="max-w-7xl mx-auto px-6 text-center">
           {/* Welcome Badge */}
-          <div className="mb-12">
-            <div className="inline-flex items-center space-x-3 px-6 py-3 bg-gray-900/60 backdrop-blur-xl rounded-full border border-gray-700/50 shadow-2xl">
+          <div className="mb-8">
+            <div className="inline-flex items-center space-x-3 px-4 py-2 bg-gray-900/60 backdrop-blur-xl rounded-full border border-gray-700/50 shadow-2xl">
               <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
               <Briefcase className="w-4 h-4 text-blue-400" />
-              <span className="text-gray-300 font-medium">Professional Services</span>
+              <span className="text-gray-300 font-medium text-sm">Professional Services</span>
             </div>
           </div>
 
           {/* Main Typography */}
-          <div className="mb-12">
+          <div className="mb-8">
             <h1 className="font-black leading-tight">
-              <div className="text-6xl md:text-7xl lg:text-8xl text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100 mb-4 drop-shadow-2xl">
+              <div className="text-4xl md:text-5xl lg:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100 mb-4 drop-shadow-2xl">
                 SERVICES
               </div>
             </h1>
           </div>
 
           {/* Subtitle */}
-          <p className="text-xl md:text-2xl text-gray-400 mb-12 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg text-gray-400 mb-8 max-w-4xl mx-auto leading-relaxed">
             Comprehensive solutions for your digital needs — from concept to deployment and beyond.
           </p>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             {[
               { number: "6+", label: "Service Areas", icon: Briefcase, color: "text-blue-400" },
               { number: "50+", label: "Projects Delivered", icon: CheckCircle, color: "text-green-400" },
@@ -187,11 +187,11 @@ const ServicesPage = () => {
               const IconComponent = stat.icon
               return (
                 <div key={index} className="text-center group">
-                  <div className="w-16 h-16 bg-gray-900/50 backdrop-blur-xl border border-gray-700/50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:border-gray-600/50 transition-all duration-300">
-                    <IconComponent className={`w-8 h-8 ${stat.color}`} />
+                  <div className="w-12 h-12 bg-gray-900/50 backdrop-blur-xl border border-gray-700/50 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 group-hover:border-gray-600/50 transition-all duration-300">
+                    <IconComponent className={`w-6 h-6 ${stat.color}`} />
                   </div>
-                  <div className="text-3xl font-black text-white mb-2">{stat.number}</div>
-                  <div className="text-gray-400 text-sm">{stat.label}</div>
+                  <div className="text-xl font-black text-white mb-1">{stat.number}</div>
+                  <div className="text-gray-400 text-xs">{stat.label}</div>
                 </div>
               )
             })}
@@ -200,28 +200,28 @@ const ServicesPage = () => {
       </section>
 
       {/* Services Grid */}
-      <section className="py-20 bg-gradient-to-b from-gray-950/50 to-black relative z-10">
+      <section className="py-16 bg-gradient-to-b from-gray-950/50 to-black relative z-10">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-500/10 border border-blue-500/30 rounded-full mb-6">
-              <Zap className="w-5 h-5 text-blue-400" />
-              <span className="text-blue-400 font-medium">What I Offer</span>
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-full mb-4">
+              <Zap className="w-4 h-4 text-blue-400" />
+              <span className="text-blue-400 font-medium text-sm">What I Offer</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100">
+            <h2 className="text-2xl md:text-3xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100">
               MY EXPERTISE
             </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base text-gray-400 max-w-3xl mx-auto leading-relaxed">
               End-to-end solutions tailored to your specific needs and business goals
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service, index) => {
               const IconComponent = service.icon
               return (
                 <div
                   key={index}
-                  className={`group relative ${service.bgColor} backdrop-blur-xl border ${service.borderColor} rounded-3xl p-8 hover:scale-105 transition-all duration-300 cursor-pointer overflow-hidden`}
+                  className={`group relative ${service.bgColor} backdrop-blur-xl border ${service.borderColor} rounded-3xl p-6 hover:scale-105 transition-all duration-300 cursor-pointer overflow-hidden`}
                 >
                   {/* Background Effects */}
                   <div
@@ -234,31 +234,31 @@ const ServicesPage = () => {
                   <div className="relative z-10">
                     {/* Enhanced Icon */}
                     <div
-                      className={`w-16 h-16 bg-gradient-to-br ${service.color} rounded-2xl flex items-center justify-center shadow-2xl mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}
+                      className={`w-12 h-12 bg-gradient-to-br ${service.color} rounded-2xl flex items-center justify-center shadow-2xl mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}
                     >
-                      <IconComponent className="w-8 h-8 text-white" />
+                      <IconComponent className="w-6 h-6 text-white" />
                     </div>
 
                     {/* Content */}
-                    <h3 className="text-xl font-bold mb-4 text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all duration-300">
+                    <h3 className="text-lg font-bold mb-3 text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all duration-300">
                       {service.title}
                     </h3>
-                    <p className="text-gray-400 group-hover:text-gray-200 transition-colors duration-300 mb-6 leading-relaxed">
+                    <p className="text-gray-400 group-hover:text-gray-200 transition-colors duration-300 mb-4 leading-relaxed text-sm">
                       {service.description}
                     </p>
 
                     {/* Features */}
-                    <div className="mb-6">
-                      <h4 className="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wide">Key Features</h4>
-                      <div className="grid grid-cols-2 gap-3">
+                    <div className="mb-4">
+                      <h4 className="text-xs font-semibold text-gray-300 mb-2 uppercase tracking-wide">Key Features</h4>
+                      <div className="grid grid-cols-2 gap-2">
                         {service.features.map((feature, idx) => {
                           const FeatureIcon = service.featureIcons[idx]
                           return (
                             <div key={idx} className="flex items-center space-x-2">
-                              <div className="w-6 h-6 bg-gray-800/50 border border-gray-700/50 rounded-lg flex items-center justify-center group-hover:bg-gray-700/50 group-hover:border-gray-600/50 transition-all duration-300">
+                              <div className="w-5 h-5 bg-gray-800/50 border border-gray-700/50 rounded-lg flex items-center justify-center group-hover:bg-gray-700/50 group-hover:border-gray-600/50 transition-all duration-300">
                                 <FeatureIcon className="w-3 h-3 text-gray-400 group-hover:text-white transition-colors duration-300" />
                               </div>
-                              <span className="text-gray-400 text-sm group-hover:text-gray-200 transition-colors duration-300">
+                              <span className="text-gray-400 text-xs group-hover:text-gray-200 transition-colors duration-300">
                                 {feature}
                               </span>
                             </div>
@@ -268,13 +268,13 @@ const ServicesPage = () => {
                     </div>
 
                     {/* Technologies */}
-                    <div className="mb-6">
-                      <h4 className="text-sm font-semibold text-gray-300 mb-3 uppercase tracking-wide">Technologies</h4>
-                      <div className="flex flex-wrap gap-2">
+                    <div className="mb-4">
+                      <h4 className="text-xs font-semibold text-gray-300 mb-2 uppercase tracking-wide">Technologies</h4>
+                      <div className="flex flex-wrap gap-1">
                         {service.technologies.map((tech, idx) => (
                           <span
                             key={idx}
-                            className="px-3 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded-full group-hover:border-gray-600/50 group-hover:text-white transition-all duration-300"
+                            className="px-2 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded-full group-hover:border-gray-600/50 group-hover:text-white transition-all duration-300"
                           >
                             {tech}
                           </span>
@@ -284,7 +284,7 @@ const ServicesPage = () => {
 
                     {/* Enhanced CTA */}
                     <div className="flex items-center space-x-2 text-gray-500 group-hover:text-blue-400 transition-colors duration-300">
-                      <span className="font-medium">Learn More</span>
+                      <span className="font-medium text-sm">Learn More</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
                   </div>
@@ -300,52 +300,52 @@ const ServicesPage = () => {
       </section>
 
       {/* Process Section */}
-      <section className="py-20 bg-black relative z-10">
+      <section className="py-16 bg-black relative z-10">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center space-x-2 px-6 py-3 bg-purple-500/10 border border-purple-500/30 rounded-full mb-6">
-              <Settings className="w-5 h-5 text-purple-400" />
-              <span className="text-purple-400 font-medium">My Process</span>
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-purple-500/10 border border-purple-500/30 rounded-full mb-4">
+              <Settings className="w-4 h-4 text-purple-400" />
+              <span className="text-purple-400 font-medium text-sm">My Process</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-100 to-pink-100">
+            <h2 className="text-2xl md:text-3xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-100 to-pink-100">
               HOW I WORK
             </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base text-gray-400 max-w-3xl mx-auto leading-relaxed">
               A proven methodology that ensures successful project delivery from start to finish
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {processSteps.map((step, index) => {
               const IconComponent = step.icon
               return (
                 <div key={index} className="text-center group">
-                  <div className="relative mb-8">
+                  <div className="relative mb-6">
                     {/* Step Number */}
-                    <div className="w-20 h-20 bg-gray-900/50 backdrop-blur-xl border border-gray-700/50 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 group-hover:border-gray-600/50 transition-all duration-300 relative overflow-hidden">
+                    <div className="w-16 h-16 bg-gray-900/50 backdrop-blur-xl border border-gray-700/50 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 group-hover:border-gray-600/50 transition-all duration-300 relative overflow-hidden">
                       <div
                         className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300`}
                       ></div>
-                      <span className="text-2xl font-black text-white relative z-10">{step.step}</span>
+                      <span className="text-lg font-black text-white relative z-10">{step.step}</span>
                     </div>
 
                     {/* Icon */}
                     <div
-                      className={`absolute -bottom-2 -right-2 w-10 h-10 bg-gradient-to-br ${step.color} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                      className={`absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-br ${step.color} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}
                     >
-                      <IconComponent className="w-5 h-5 text-white" />
+                      <IconComponent className="w-4 h-4 text-white" />
                     </div>
 
                     {/* Connection Line */}
                     {index < processSteps.length - 1 && (
-                      <div className="hidden lg:block absolute top-10 left-full w-full h-0.5 bg-gradient-to-r from-gray-700 to-transparent -translate-x-10"></div>
+                      <div className="hidden lg:block absolute top-8 left-full w-full h-0.5 bg-gradient-to-r from-gray-700 to-transparent -translate-x-8"></div>
                     )}
                   </div>
 
-                  <h3 className="text-xl font-bold mb-3 text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all duration-300">
+                  <h3 className="text-lg font-bold mb-2 text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all duration-300">
                     {step.title}
                   </h3>
-                  <p className="text-gray-400 group-hover:text-gray-200 transition-colors duration-300 leading-relaxed">
+                  <p className="text-gray-400 group-hover:text-gray-200 transition-colors duration-300 leading-relaxed text-sm">
                     {step.description}
                   </p>
                 </div>
@@ -356,42 +356,42 @@ const ServicesPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-b from-gray-950/50 to-black relative z-10">
+      <section className="py-16 bg-gradient-to-b from-gray-950/50 to-black relative z-10">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <div className="bg-gradient-to-r from-gray-900/60 to-gray-800/60 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-12 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-900/60 to-gray-800/60 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-8 relative overflow-hidden">
             {/* Background Effects */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5"></div>
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
 
             <div className="relative z-10">
-              <h2 className="text-4xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100">
+              <h2 className="text-2xl md:text-3xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-purple-100">
                 Don't See What You're Looking For?
               </h2>
-              <p className="text-gray-400 mb-8 max-w-2xl mx-auto text-lg leading-relaxed">
+              <p className="text-gray-400 mb-6 max-w-2xl mx-auto text-base leading-relaxed">
                 Let's build it together! I love taking on unique challenges and creating custom solutions tailored to
                 your specific needs.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/contact"
-                  className="group relative bg-white hover:bg-gray-100 text-black px-10 py-4 font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl rounded-xl overflow-hidden"
+                  className="group relative bg-white hover:bg-gray-100 text-black px-6 py-3 font-bold text-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl rounded-xl overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center space-x-2">
-                    <MessageSquare className="w-5 h-5" />
+                    <MessageSquare className="w-4 h-4" />
                     <span>Let's Discuss</span>
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                 </Link>
 
                 <Link
                   href="/projects"
-                  className="border-2 border-white hover:bg-white hover:text-black text-white px-10 py-4 font-bold text-lg transition-all duration-300 hover:scale-105 rounded-xl flex items-center space-x-2"
+                  className="border-2 border-white hover:bg-white hover:text-black text-white px-6 py-3 font-bold text-sm transition-all duration-300 hover:scale-105 rounded-xl flex items-center space-x-2"
                 >
-                  <Briefcase className="w-5 h-5" />
+                  <Briefcase className="w-4 h-4" />
                   <span>View My Work</span>
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
