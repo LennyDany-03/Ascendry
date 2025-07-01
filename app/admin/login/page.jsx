@@ -11,8 +11,6 @@ import { useRouter } from "next/navigation"
 const AdminLoginPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [showSuccess, setShowSuccess] = useState(false)
-  const [showTickAnimation, setShowTickAnimation] = useState(false)
   const router = useRouter()
 
   // Track mouse movement for interactive effects
@@ -31,6 +29,7 @@ const AdminLoginPage = () => {
       const {
         data: { session },
       } = await supabase.auth.getSession()
+
       if (session) {
         // Check if user has admin access
         const { data: adminData } = await supabase
@@ -41,7 +40,7 @@ const AdminLoginPage = () => {
           .single()
 
         if (adminData) {
-          router.push("/contact")
+          router.push("/admin/dashboard")
         }
       }
     }
@@ -75,68 +74,10 @@ const AdminLoginPage = () => {
     }
   }
 
-  const showSuccessAnimation = () => {
-    setShowSuccess(true)
-
-    // Trigger tick animation after modal appears
-    setTimeout(() => {
-      setShowTickAnimation(true)
-    }, 300)
-
-    // Redirect after animation
-    setTimeout(() => {
-      router.push("/admin/dashboard")
-    }, 2500)
-  }
-
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       <InteractiveBackground />
       <Navbar />
-
-      {/* Success Modal */}
-      {showSuccess && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md animate-fade-in" />
-
-          {/* Modal Content */}
-          <div className="relative bg-gray-900 border border-gray-700 rounded-3xl p-12 max-w-md mx-4 text-center animate-scale-in shadow-2xl">
-            {/* Tick Animation */}
-            <div className="mb-8">
-              <div
-                className={`w-24 h-24 mx-auto rounded-full border-4 border-green-500 flex items-center justify-center ${showTickAnimation ? "animate-tick-circle" : ""}`}
-              >
-                <svg
-                  className={`w-12 h-12 text-green-500 ${showTickAnimation ? "animate-tick-draw" : "opacity-0"}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={3}
-                    d="M5 13l4 4L19 7"
-                    className="tick-path"
-                  />
-                </svg>
-              </div>
-            </div>
-
-            {/* Success Message */}
-            <div className="space-y-4">
-              <h3 className="text-3xl font-black text-white">Login Successful!</h3>
-              <p className="text-lg text-gray-300 leading-relaxed">
-                Welcome to the admin dashboard. Redirecting you now...
-              </p>
-              <p className="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                Access Granted! 🚀
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Dynamic Background Elements */}
       <div className="fixed inset-0 pointer-events-none">
@@ -337,85 +278,6 @@ const AdminLoginPage = () => {
       </section>
 
       <Footer />
-
-      {/* Custom Styles */}
-      <style jsx>{`
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-
-        @keyframes scale-in {
-          from { 
-            opacity: 0; 
-            transform: scale(0.8) translateY(20px); 
-          }
-          to { 
-            opacity: 1; 
-            transform: scale(1) translateY(0); 
-          }
-        }
-
-        @keyframes tick-circle {
-          0% { 
-            transform: scale(0.8); 
-            border-color: #6b7280; 
-          }
-          50% { 
-            transform: scale(1.1); 
-            border-color: #10b981; 
-          }
-          100% { 
-            transform: scale(1); 
-            border-color: #10b981; 
-          }
-        }
-
-        @keyframes tick-draw {
-          0% { 
-            opacity: 0;
-            stroke-dasharray: 0 50;
-          }
-          50% { 
-            opacity: 1;
-            stroke-dasharray: 25 50;
-          }
-          100% { 
-            opacity: 1;
-            stroke-dasharray: 50 50;
-          }
-        }
-
-        .animate-fade-in {
-          animation: fade-in 0.3s ease-out forwards;
-        }
-
-        .animate-scale-in {
-          animation: scale-in 0.4s ease-out forwards;
-        }
-
-        .animate-tick-circle {
-          animation: tick-circle 0.6s ease-out forwards;
-        }
-
-        .animate-tick-draw {
-          animation: tick-draw 0.8s ease-out 0.3s forwards;
-        }
-
-        .tick-path {
-          stroke-dasharray: 50;
-          stroke-dashoffset: 50;
-        }
-
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-        
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   )
 }

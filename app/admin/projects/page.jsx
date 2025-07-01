@@ -87,22 +87,39 @@ const AdminProjectsPage = () => {
 
         setUser(session.user)
 
-        // Check admin access
+        // Check admin access using user_id instead of email
         const { data: adminRecord, error } = await supabase
           .from("admin_access")
           .select("*")
-          .eq("email", session.user.email)
+          .eq("user_id", session.user.id)
           .eq("is_active", true)
           .single()
 
         if (error || !adminRecord) {
           console.error("Admin access denied:", error)
-          await supabase.auth.signOut()
-          router.push("/admin/login")
-          return
+
+          // If no user_id match, try email as fallback and update user_id
+          const { data: emailMatch, error: emailError } = await supabase
+            .from("admin_access")
+            .select("*")
+            .eq("email", session.user.email)
+            .eq("is_active", true)
+            .single()
+
+          if (emailError || !emailMatch) {
+            await supabase.auth.signOut()
+            router.push("/admin/login")
+            return
+          }
+
+          // Update the record with user_id
+          await supabase.from("admin_access").update({ user_id: session.user.id }).eq("email", session.user.email)
+
+          setAdminData(emailMatch)
+        } else {
+          setAdminData(adminRecord)
         }
 
-        setAdminData(adminRecord)
         await loadProjects()
       } catch (error) {
         console.error("Auth check error:", error)
@@ -115,38 +132,17 @@ const AdminProjectsPage = () => {
     checkAuth()
   }, [router])
 
-  // Load projects from database (mock data for now)
+  // Load projects from database
   const loadProjects = async () => {
-    // Mock data - replace with actual Supabase query
-    const mockProjects = [
-      {
-        id: "club-sphere",
-        title: "Club Sphere",
-        subtitle: "College Club Management System",
-        description: "A comprehensive full-stack solution that revolutionizes how college clubs operate.",
-        longDescription:
-          "Built to solve the complex challenges of managing multiple college clubs with thousands of students. This platform provides a centralized hub for event management, member coordination, and administrative tasks.",
-        techStack: ["React", "Supabase", "Razorpay", "Tailwind CSS", "Node.js"],
-        githubUrl: "https://github.com/example/club-sphere",
-        liveUrl: "https://clubsphere.demo.com",
-        category: "Full-Stack",
-        status: "Live",
-        duration: "3 months",
-        year: "2024",
-        thumbnail: "/placeholder.svg?height=300&width=500",
-        gradient: "from-blue-500 via-purple-500 to-pink-500",
-        icon: "Users",
-        features: ["Event Management", "Payment Integration", "Real-time Notifications", "Admin Dashboard"],
-        metrics: { users: "500+", projects: "100+", satisfaction: "98%" },
-        complexity: "High",
-        impact: "Streamlined club operations for 10+ colleges",
-        caseStudyImage1: "/placeholder.svg?height=400&width=600",
-        caseStudyImage2: "/placeholder.svg?height=400&width=600",
-        created_at: "2024-01-15T10:00:00Z",
-        updated_at: "2024-01-15T10:00:00Z",
-      },
-    ]
-    setProjects(mockProjects)
+    try {
+      const { data, error } = await supabase.from("projects").select("*").order("created_at", { ascending: false })
+
+      if (error) throw error
+      setProjects(data || [])
+    } catch (error) {
+      console.error("Error loading projects:", error)
+      toast.error("Failed to load projects")
+    }
   }
 
   // Handle form input changes
@@ -199,22 +195,32 @@ const AdminProjectsPage = () => {
     }))
   }
 
-  // Handle image upload
+  // Handle image upload with better error handling and loading states
   const handleImageUpload = async (file, fieldName) => {
     if (!file) return
 
     setUploading(true)
     try {
-      // Mock upload - replace with actual Supabase storage upload
-      const mockUrl = URL.createObjectURL(file)
-      setFormData((prev) => ({ ...prev, [fieldName]: mockUrl }))
+      const fileExt = file.name.split(".").pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+      const filePath = `projects/${fileName}`
 
-      // Simulate upload delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const { error: uploadError } = await supabase.storage.from("project-images").upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: false,
+      })
+
+      if (uploadError) throw uploadError
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("project-images").getPublicUrl(filePath)
+
+      setFormData((prev) => ({ ...prev, [fieldName]: publicUrl }))
       toast.success("Image uploaded successfully!")
     } catch (error) {
       console.error("Upload error:", error)
-      toast.error("Failed to upload image")
+      toast.error(`Failed to upload image: ${error.message}`)
     } finally {
       setUploading(false)
     }
@@ -226,40 +232,62 @@ const AdminProjectsPage = () => {
     setUploading(true)
 
     try {
-      // Mock save - replace with actual Supabase insert/update
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      // Validate required fields
+      if (!formData.title || !formData.description || !formData.category) {
+        toast.error("Please fill in all required fields")
+        setUploading(false)
+        return
+      }
+
+      const projectData = {
+        title: formData.title,
+        subtitle: formData.subtitle || null,
+        description: formData.description,
+        long_description: formData.longDescription || null,
+        tech_stack: formData.techStack,
+        github_url: formData.githubUrl || null,
+        live_url: formData.liveUrl || null,
+        category: formData.category,
+        status: formData.status,
+        duration: formData.duration || null,
+        year: formData.year,
+        thumbnail: formData.thumbnail || null,
+        gradient: formData.gradient,
+        icon: formData.icon,
+        features: formData.features,
+        metrics: formData.metrics,
+        complexity: formData.complexity,
+        impact: formData.impact || null,
+        case_study_image1: formData.caseStudyImage1 || null,
+        case_study_image2: formData.caseStudyImage2 || null,
+        created_by: user.id,
+        is_published: true,
+      }
 
       if (editingProject) {
         // Update existing project
-        setProjects((prev) =>
-          prev.map((p) =>
-            p.id === editingProject.id
-              ? { ...formData, id: editingProject.id, updated_at: new Date().toISOString() }
-              : p,
-          ),
-        )
+        const { error } = await supabase.from("projects").update(projectData).eq("id", editingProject.id)
+
+        if (error) throw error
         toast.success("Project updated successfully!")
       } else {
         // Create new project
-        const newProject = {
-          ...formData,
-          id: `project-${Date.now()}`,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-        setProjects((prev) => [newProject, ...prev])
+        const { error } = await supabase.from("projects").insert([projectData])
+
+        if (error) throw error
         toast.success("Project created successfully!")
       }
 
-      // Reset form
+      // Reload projects and reset form
+      await loadProjects()
       setTimeout(() => {
         setShowForm(false)
         setEditingProject(null)
         resetForm()
-      }, 2000)
+      }, 1000)
     } catch (error) {
       console.error("Save error:", error)
-      toast.error("Error saving project. Please try again.")
+      toast.error(`Error saving project: ${error.message}`)
     } finally {
       setUploading(false)
     }
@@ -296,7 +324,28 @@ const AdminProjectsPage = () => {
   // Handle edit
   const handleEdit = (project) => {
     setEditingProject(project)
-    setFormData(project)
+    setFormData({
+      title: project.title || "",
+      subtitle: project.subtitle || "",
+      description: project.description || "",
+      longDescription: project.long_description || "",
+      techStack: Array.isArray(project.tech_stack) ? project.tech_stack : [],
+      githubUrl: project.github_url || "",
+      liveUrl: project.live_url || "",
+      category: project.category || "",
+      status: project.status || "Live",
+      duration: project.duration || "",
+      year: project.year || new Date().getFullYear().toString(),
+      thumbnail: project.thumbnail || "",
+      gradient: project.gradient || "from-blue-500 to-purple-500",
+      icon: project.icon || "Code",
+      features: Array.isArray(project.features) ? project.features : [],
+      metrics: project.metrics || { users: "", projects: "", satisfaction: "" },
+      complexity: project.complexity || "Medium",
+      impact: project.impact || "",
+      caseStudyImage1: project.case_study_image1 || "",
+      caseStudyImage2: project.case_study_image2 || "",
+    })
     setShowForm(true)
   }
 
@@ -312,19 +361,28 @@ const AdminProjectsPage = () => {
   // Handle delete
   const handleDelete = async () => {
     try {
-      setProjects((prev) => prev.filter((p) => p.id !== confirmModal.projectId))
+      const { error } = await supabase.from("projects").delete().eq("id", confirmModal.projectId)
+
+      if (error) throw error
+
+      await loadProjects()
       toast.success("Project deleted successfully!")
     } catch (error) {
+      console.error("Delete error:", error)
       toast.error("Failed to delete project")
     }
   }
 
-  // Filter projects
+  // Filter projects with null safety
   const filteredProjects = projects.filter((project) => {
+    const title = project.title || ""
+    const description = project.description || ""
+    const category = project.category || ""
+
     const matchesSearch =
-      project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || project.category === selectedCategory
+      title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      description.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = selectedCategory === "all" || category === selectedCategory
     return matchesSearch && matchesCategory
   })
 
@@ -351,7 +409,7 @@ const AdminProjectsPage = () => {
     "Users",
     "CreditCard",
     "Heart",
-    "Zap",
+    "Briefcase",
   ]
 
   const gradientOptions = [
@@ -470,29 +528,36 @@ const AdminProjectsPage = () => {
                   >
                     {/* Project Image */}
                     <div className="relative h-48 overflow-hidden">
-                      <div className={`absolute inset-0 bg-gradient-to-br ${project.gradient} opacity-20`}></div>
+                      <div
+                        className={`absolute inset-0 bg-gradient-to-br ${project.gradient || "from-blue-500 to-purple-500"} opacity-20`}
+                      ></div>
                       {project.thumbnail ? (
                         <img
                           src={project.thumbnail || "/placeholder.svg"}
-                          alt={project.title}
+                          alt={project.title || "Project"}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = "none"
+                          }}
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-6xl opacity-40">💻</div>
+                          <div className="text-6xl opacity-40">💼</div>
                         </div>
                       )}
 
                       {/* Status Badge */}
                       <div className="absolute top-4 left-4">
                         <div
-                          className={`px-2 py-1 rounded-lg text-xs font-medium ${
+                          className={`px-3 py-1 rounded-full text-xs font-bold shadow-lg ${
                             project.status === "Live"
-                              ? "bg-green-500/20 border border-green-500/30 text-green-400"
-                              : "bg-yellow-500/20 border border-yellow-500/30 text-yellow-400"
+                              ? "bg-green-500 text-white"
+                              : project.status === "In Progress"
+                                ? "bg-yellow-500 text-black"
+                                : "bg-gray-500 text-white"
                           }`}
                         >
-                          {project.status}
+                          {project.status || "Live"}
                         </div>
                       </div>
 
@@ -511,61 +576,70 @@ const AdminProjectsPage = () => {
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
+
+                      {/* Links */}
+                      <div className="absolute bottom-4 right-4 flex space-x-2">
+                        {project.github_url && (
+                          <a
+                            href={project.github_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-8 h-8 bg-black/80 backdrop-blur-sm hover:bg-black text-white rounded-lg flex items-center justify-center transition-colors duration-300"
+                          >
+                            <Github className="w-4 h-4" />
+                          </a>
+                        )}
+                        {project.live_url && (
+                          <a
+                            href={project.live_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-8 h-8 bg-blue-500/80 backdrop-blur-sm hover:bg-blue-500 text-white rounded-lg flex items-center justify-center transition-colors duration-300"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
+                      </div>
                     </div>
 
                     {/* Project Content */}
                     <div className="p-6">
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-blue-400 text-xs font-medium uppercase tracking-wider">
-                          {project.category}
+                          {project.category || "Project"}
                         </span>
-                        <span className="text-gray-400 text-xs">{project.year}</span>
+                        <span className="text-gray-400 text-xs">{project.year || "2024"}</span>
                       </div>
 
-                      <h3 className="text-xl font-bold text-white mb-2">{project.title}</h3>
-                      <p className="text-gray-400 text-sm mb-4 line-clamp-2">{project.description}</p>
+                      <h3 className="text-xl font-bold text-white mb-2">{project.title || "Untitled Project"}</h3>
+                      {project.subtitle && <p className="text-gray-300 text-sm mb-2">{project.subtitle}</p>}
+                      <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+                        {project.description || "No description available"}
+                      </p>
 
                       {/* Tech Stack */}
                       <div className="flex flex-wrap gap-1 mb-4">
-                        {project.techStack.slice(0, 3).map((tech, index) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                        {project.techStack.length > 3 && (
+                        {(Array.isArray(project.tech_stack) ? project.tech_stack : [])
+                          .slice(0, 3)
+                          .map((tech, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        {(Array.isArray(project.tech_stack) ? project.tech_stack : []).length > 3 && (
                           <span className="px-2 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded">
-                            +{project.techStack.length - 3}
+                            +{project.tech_stack.length - 3}
                           </span>
                         )}
                       </div>
 
-                      {/* Links */}
-                      <div className="flex items-center space-x-4 text-sm">
-                        {project.liveUrl && (
-                          <a
-                            href={project.liveUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-green-400 hover:text-green-300 flex items-center space-x-1"
-                          >
-                            <ExternalLink className="w-3 h-3" />
-                            <span>Live</span>
-                          </a>
-                        )}
-                        {project.githubUrl && (
-                          <a
-                            href={project.githubUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-gray-400 hover:text-white flex items-center space-x-1"
-                          >
-                            <Github className="w-3 h-3" />
-                            <span>Code</span>
-                          </a>
-                        )}
+                      {/* Stats */}
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="text-gray-400">{project.complexity || "Medium"}</div>
+                        {project.duration && <div className="text-blue-400">{project.duration}</div>}
                       </div>
                     </div>
                   </div>
@@ -657,48 +731,10 @@ const AdminProjectsPage = () => {
                         value={formData.subtitle}
                         onChange={handleInputChange}
                         className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
-                        placeholder="Brief subtitle"
+                        placeholder="Enter project subtitle"
                       />
                     </div>
                   </div>
-
-                  <div>
-                    <label className="block text-gray-300 font-medium mb-2">
-                      Short Description <span className="text-red-400">*</span>
-                    </label>
-                    <textarea
-                      name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      required
-                      rows={3}
-                      className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300 resize-none"
-                      placeholder="Brief description for project cards"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-300 font-medium mb-2">
-                      Long Description <span className="text-red-400">*</span>
-                    </label>
-                    <textarea
-                      name="longDescription"
-                      value={formData.longDescription}
-                      onChange={handleInputChange}
-                      required
-                      rows={6}
-                      className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300 resize-none"
-                      placeholder="Detailed description for case studies and project pages"
-                    />
-                  </div>
-                </div>
-
-                {/* Project Details */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-white flex items-center space-x-2">
-                    <Briefcase className="w-5 h-5 text-blue-400" />
-                    <span>Project Details</span>
-                  </h3>
 
                   <div className="grid md:grid-cols-3 gap-6">
                     <div>
@@ -712,7 +748,7 @@ const AdminProjectsPage = () => {
                         required
                         className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
                       >
-                        <option value="">Select category</option>
+                        <option value="">Select Category</option>
                         <option value="Full-Stack">Full-Stack</option>
                         <option value="Mobile App">Mobile App</option>
                         <option value="Website">Website</option>
@@ -732,39 +768,9 @@ const AdminProjectsPage = () => {
                         className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
                       >
                         <option value="Live">Live</option>
-                        <option value="In Development">In Development</option>
+                        <option value="In Progress">In Progress</option>
                         <option value="Completed">Completed</option>
-                        <option value="On Hold">On Hold</option>
                       </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-300 font-medium mb-2">Complexity</label>
-                      <select
-                        name="complexity"
-                        value={formData.complexity}
-                        onChange={handleInputChange}
-                        className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
-                      >
-                        <option value="Beginner">Beginner</option>
-                        <option value="Medium">Medium</option>
-                        <option value="High">High</option>
-                        <option value="Very High">Very High</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-gray-300 font-medium mb-2">Duration</label>
-                      <input
-                        type="text"
-                        name="duration"
-                        value={formData.duration}
-                        onChange={handleInputChange}
-                        className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
-                        placeholder="e.g., 3 months"
-                      />
                     </div>
 
                     <div>
@@ -781,14 +787,29 @@ const AdminProjectsPage = () => {
                   </div>
 
                   <div>
-                    <label className="block text-gray-300 font-medium mb-2">Impact Statement</label>
-                    <input
-                      type="text"
-                      name="impact"
-                      value={formData.impact}
+                    <label className="block text-gray-300 font-medium mb-2">
+                      Short Description <span className="text-red-400">*</span>
+                    </label>
+                    <textarea
+                      name="description"
+                      value={formData.description}
                       onChange={handleInputChange}
-                      className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
-                      placeholder="e.g., Streamlined club operations for 10+ colleges"
+                      required
+                      rows={3}
+                      className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300 resize-none"
+                      placeholder="Brief description of the project"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-300 font-medium mb-2">Long Description</label>
+                    <textarea
+                      name="longDescription"
+                      value={formData.longDescription}
+                      onChange={handleInputChange}
+                      rows={6}
+                      className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300 resize-none"
+                      placeholder="Detailed description of the project, challenges, solutions, etc."
                     />
                   </div>
                 </div>
@@ -891,6 +912,88 @@ const AdminProjectsPage = () => {
                   </div>
                 </div>
 
+                {/* Project Details */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-bold text-white flex items-center space-x-2">
+                    <Target className="w-5 h-5 text-blue-400" />
+                    <span>Project Details</span>
+                  </h3>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-gray-300 font-medium mb-2">Duration</label>
+                      <input
+                        type="text"
+                        name="duration"
+                        value={formData.duration}
+                        onChange={handleInputChange}
+                        className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
+                        placeholder="e.g., 3 months"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-300 font-medium mb-2">Complexity</label>
+                      <select
+                        name="complexity"
+                        value={formData.complexity}
+                        onChange={handleInputChange}
+                        className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
+                      >
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-300 font-medium mb-2">Impact & Results</label>
+                    <textarea
+                      name="impact"
+                      value={formData.impact}
+                      onChange={handleInputChange}
+                      rows={3}
+                      className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300 resize-none"
+                      placeholder="Describe the impact and results of this project"
+                    />
+                  </div>
+                </div>
+
+                {/* URLs */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-bold text-white flex items-center space-x-2">
+                    <Globe className="w-5 h-5 text-blue-400" />
+                    <span>Project URLs</span>
+                  </h3>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-gray-300 font-medium mb-2">GitHub URL</label>
+                      <input
+                        type="url"
+                        name="githubUrl"
+                        value={formData.githubUrl}
+                        onChange={handleInputChange}
+                        className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
+                        placeholder="https://github.com/..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-300 font-medium mb-2">Live URL</label>
+                      <input
+                        type="url"
+                        name="liveUrl"
+                        value={formData.liveUrl}
+                        onChange={handleInputChange}
+                        className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
+                        placeholder="https://..."
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 {/* Metrics */}
                 <div className="space-y-6">
                   <h3 className="text-xl font-bold text-white flex items-center space-x-2">
@@ -900,11 +1003,23 @@ const AdminProjectsPage = () => {
 
                   <div className="grid md:grid-cols-3 gap-6">
                     <div>
-                      <label className="block text-gray-300 font-medium mb-2">Users/Downloads</label>
+                      <label className="block text-gray-300 font-medium mb-2">Users</label>
                       <input
                         type="text"
                         name="metrics.users"
                         value={formData.metrics.users}
+                        onChange={handleInputChange}
+                        className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
+                        placeholder="e.g., 10K+"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-300 font-medium mb-2">Projects</label>
+                      <input
+                        type="text"
+                        name="metrics.projects"
+                        value={formData.metrics.projects}
                         onChange={handleInputChange}
                         className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
                         placeholder="e.g., 500+"
@@ -912,19 +1027,7 @@ const AdminProjectsPage = () => {
                     </div>
 
                     <div>
-                      <label className="block text-gray-300 font-medium mb-2">Projects/Events</label>
-                      <input
-                        type="text"
-                        name="metrics.projects"
-                        value={formData.metrics.projects}
-                        onChange={handleInputChange}
-                        className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
-                        placeholder="e.g., 100+"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-300 font-medium mb-2">Satisfaction Rate</label>
+                      <label className="block text-gray-300 font-medium mb-2">Satisfaction</label>
                       <input
                         type="text"
                         name="metrics.satisfaction"
@@ -932,40 +1035,6 @@ const AdminProjectsPage = () => {
                         onChange={handleInputChange}
                         className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
                         placeholder="e.g., 98%"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Links */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-white flex items-center space-x-2">
-                    <ExternalLink className="w-5 h-5 text-blue-400" />
-                    <span>Project Links</span>
-                  </h3>
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-gray-300 font-medium mb-2">Live URL</label>
-                      <input
-                        type="url"
-                        name="liveUrl"
-                        value={formData.liveUrl}
-                        onChange={handleInputChange}
-                        className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
-                        placeholder="https://example.com"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-300 font-medium mb-2">GitHub URL</label>
-                      <input
-                        type="url"
-                        name="githubUrl"
-                        value={formData.githubUrl}
-                        onChange={handleInputChange}
-                        className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
-                        placeholder="https://github.com/username/repo"
                       />
                     </div>
                   </div>
@@ -1013,79 +1082,76 @@ const AdminProjectsPage = () => {
                   </div>
                 </div>
 
-                {/* Image Uploads */}
+                {/* Image Upload */}
                 <div className="space-y-6">
                   <h3 className="text-xl font-bold text-white flex items-center space-x-2">
                     <ImageIcon className="w-5 h-5 text-blue-400" />
-                    <span>Images</span>
+                    <span>Project Images</span>
                   </h3>
 
-                  {/* Thumbnail */}
-                  <div>
-                    <label className="block text-gray-300 font-medium mb-2">Project Thumbnail</label>
-                    <div className="border-2 border-dashed border-gray-700/50 rounded-xl p-6 text-center hover:border-gray-600/50 transition-colors duration-300">
-                      {formData.thumbnail ? (
-                        <div className="space-y-4">
-                          <img
-                            src={formData.thumbnail || "/placeholder.svg"}
-                            alt="Thumbnail preview"
-                            className="w-full h-48 object-cover rounded-lg"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setFormData((prev) => ({ ...prev, thumbnail: "" }))}
-                            className="text-red-400 hover:text-red-300 transition-colors duration-300"
-                          >
-                            Remove Image
-                          </button>
-                        </div>
-                      ) : (
-                        <div>
-                          <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-400 mb-4">Upload project thumbnail</p>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleImageUpload(e.target.files[0], "thumbnail")}
-                            className="hidden"
-                            id="thumbnail-upload"
-                          />
-                          <label
-                            htmlFor="thumbnail-upload"
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer transition-colors duration-300"
-                          >
-                            Choose File
-                          </label>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Case Study Images */}
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {/* Case Study Image 1 */}
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {/* Thumbnail */}
                     <div>
-                      <label className="block text-gray-300 font-medium mb-2">Case Study Image 1</label>
+                      <label className="block text-gray-300 font-medium mb-2">Thumbnail</label>
                       <div className="border-2 border-dashed border-gray-700/50 rounded-xl p-4 text-center hover:border-gray-600/50 transition-colors duration-300">
-                        {formData.caseStudyImage1 ? (
-                          <div className="space-y-3">
+                        {formData.thumbnail ? (
+                          <div className="space-y-2">
                             <img
-                              src={formData.caseStudyImage1 || "/placeholder.svg"}
-                              alt="Case study 1 preview"
+                              src={formData.thumbnail || "/placeholder.svg"}
+                              alt="Thumbnail preview"
                               className="w-full h-32 object-cover rounded-lg"
                             />
                             <button
                               type="button"
-                              onClick={() => setFormData((prev) => ({ ...prev, caseStudyImage1: "" }))}
-                              className="text-red-400 hover:text-red-300 transition-colors duration-300 text-sm"
+                              onClick={() => setFormData((prev) => ({ ...prev, thumbnail: "" }))}
+                              className="text-red-400 hover:text-red-300 text-sm transition-colors duration-300"
                             >
                               Remove
                             </button>
                           </div>
                         ) : (
                           <div>
-                            <ImageIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                            <p className="text-gray-400 text-sm mb-3">Case study image</p>
+                            <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleImageUpload(e.target.files[0], "thumbnail")}
+                              className="hidden"
+                              id="thumbnail-upload"
+                            />
+                            <label
+                              htmlFor="thumbnail-upload"
+                              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm cursor-pointer transition-colors duration-300"
+                            >
+                              Upload
+                            </label>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Case Study Image 1 */}
+                    <div>
+                      <label className="block text-gray-300 font-medium mb-2">Case Study Image 1</label>
+                      <div className="border-2 border-dashed border-gray-700/50 rounded-xl p-4 text-center hover:border-gray-600/50 transition-colors duration-300">
+                        {formData.caseStudyImage1 ? (
+                          <div className="space-y-2">
+                            <img
+                              src={formData.caseStudyImage1 || "/placeholder.svg"}
+                              alt="Case study preview"
+                              className="w-full h-32 object-cover rounded-lg"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setFormData((prev) => ({ ...prev, caseStudyImage1: "" }))}
+                              className="text-red-400 hover:text-red-300 text-sm transition-colors duration-300"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ) : (
+                          <div>
+                            <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                             <input
                               type="file"
                               accept="image/*"
@@ -1095,7 +1161,7 @@ const AdminProjectsPage = () => {
                             />
                             <label
                               htmlFor="case-study-1-upload"
-                              className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded-lg cursor-pointer transition-colors duration-300 text-sm"
+                              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm cursor-pointer transition-colors duration-300"
                             >
                               Upload
                             </label>
@@ -1109,24 +1175,23 @@ const AdminProjectsPage = () => {
                       <label className="block text-gray-300 font-medium mb-2">Case Study Image 2</label>
                       <div className="border-2 border-dashed border-gray-700/50 rounded-xl p-4 text-center hover:border-gray-600/50 transition-colors duration-300">
                         {formData.caseStudyImage2 ? (
-                          <div className="space-y-3">
+                          <div className="space-y-2">
                             <img
                               src={formData.caseStudyImage2 || "/placeholder.svg"}
-                              alt="Case study 2 preview"
+                              alt="Case study preview"
                               className="w-full h-32 object-cover rounded-lg"
                             />
                             <button
                               type="button"
                               onClick={() => setFormData((prev) => ({ ...prev, caseStudyImage2: "" }))}
-                              className="text-red-400 hover:text-red-300 transition-colors duration-300 text-sm"
+                              className="text-red-400 hover:text-red-300 text-sm transition-colors duration-300"
                             >
                               Remove
                             </button>
                           </div>
                         ) : (
                           <div>
-                            <ImageIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                            <p className="text-gray-400 text-sm mb-3">Case study image</p>
+                            <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                             <input
                               type="file"
                               accept="image/*"
@@ -1136,7 +1201,7 @@ const AdminProjectsPage = () => {
                             />
                             <label
                               htmlFor="case-study-2-upload"
-                              className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded-lg cursor-pointer transition-colors duration-300 text-sm"
+                              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm cursor-pointer transition-colors duration-300"
                             >
                               Upload
                             </label>

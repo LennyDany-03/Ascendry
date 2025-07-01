@@ -64,6 +64,9 @@ const AdminStorePage = () => {
     downloads: "0+",
     rating: "4.5",
     complexity: "Intermediate",
+    downloadUrl: "",
+    demoUrl: "",
+    documentationUrl: "",
   })
   const [techInput, setTechInput] = useState("")
   const [featureInput, setFeatureInput] = useState("")
@@ -87,22 +90,39 @@ const AdminStorePage = () => {
 
         setUser(session.user)
 
-        // Check admin access
+        // Check admin access using user_id instead of email
         const { data: adminRecord, error } = await supabase
           .from("admin_access")
           .select("*")
-          .eq("email", session.user.email)
+          .eq("user_id", session.user.id)
           .eq("is_active", true)
           .single()
 
         if (error || !adminRecord) {
           console.error("Admin access denied:", error)
-          await supabase.auth.signOut()
-          router.push("/admin/login")
-          return
+
+          // If no user_id match, try email as fallback and update user_id
+          const { data: emailMatch, error: emailError } = await supabase
+            .from("admin_access")
+            .select("*")
+            .eq("email", session.user.email)
+            .eq("is_active", true)
+            .single()
+
+          if (emailError || !emailMatch) {
+            await supabase.auth.signOut()
+            router.push("/admin/login")
+            return
+          }
+
+          // Update the record with user_id
+          await supabase.from("admin_access").update({ user_id: session.user.id }).eq("email", session.user.email)
+
+          setAdminData(emailMatch)
+        } else {
+          setAdminData(adminRecord)
         }
 
-        setAdminData(adminRecord)
         await loadProducts()
       } catch (error) {
         console.error("Auth check error:", error)
@@ -115,53 +135,17 @@ const AdminStorePage = () => {
     checkAuth()
   }, [router])
 
-  // Load products from database (mock data for now)
+  // Load products from database
   const loadProducts = async () => {
-    // Mock data - replace with actual Supabase query
-    const mockProducts = [
-      {
-        id: "novapay-template",
-        title: "NovaPay - UPI Expense Tracker",
-        description:
-          "Complete React template for UPI expense tracking with dashboard, analytics, and backend integration.",
-        techStack: ["React", "Supabase", "Tailwind CSS", "Chart.js", "Vite"],
-        price: 799,
-        originalPrice: 999,
-        category: "template",
-        isPopular: true,
-        isFree: false,
-        thumbnail: "/placeholder.svg?height=200&width=300",
-        gradient: "from-purple-500 via-pink-500 to-rose-500",
-        icon: "CreditCard",
-        features: ["AI Insights", "Real-time Tracking", "Smart Analytics", "Export Data"],
-        downloads: "500+",
-        rating: 4.9,
-        complexity: "Advanced",
-        created_at: "2024-01-15T10:00:00Z",
-        updated_at: "2024-01-15T10:00:00Z",
-      },
-      {
-        id: "tailwind-ui-kit",
-        title: "Tailwind UI Component Kit",
-        description: "50+ premium UI components built with Tailwind CSS. Cards, buttons, forms, navigation, and more.",
-        techStack: ["Tailwind CSS", "React", "TypeScript", "Storybook"],
-        price: 199,
-        originalPrice: null,
-        category: "ui-kit",
-        isPopular: false,
-        isFree: false,
-        thumbnail: "/placeholder.svg?height=200&width=300",
-        gradient: "from-green-500 via-emerald-500 to-teal-500",
-        icon: "Palette",
-        features: ["50+ Components", "TypeScript Support", "Dark Mode", "Responsive Design"],
-        downloads: "800+",
-        rating: 4.9,
-        complexity: "Beginner",
-        created_at: "2024-01-10T10:00:00Z",
-        updated_at: "2024-01-10T10:00:00Z",
-      },
-    ]
-    setProducts(mockProducts)
+    try {
+      const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false })
+
+      if (error) throw error
+      setProducts(data || [])
+    } catch (error) {
+      console.error("Error loading products:", error)
+      toast.error("Failed to load products")
+    }
   }
 
   // Handle form input changes
@@ -215,16 +199,26 @@ const AdminStorePage = () => {
 
     setUploading(true)
     try {
-      // Mock upload - replace with actual Supabase storage upload
-      const mockUrl = URL.createObjectURL(file)
-      setFormData((prev) => ({ ...prev, [fieldName]: mockUrl }))
+      const fileExt = file.name.split(".").pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+      const filePath = `products/${fileName}`
 
-      // Simulate upload delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const { error: uploadError } = await supabase.storage.from("product-images").upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: false,
+      })
+
+      if (uploadError) throw uploadError
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("product-images").getPublicUrl(filePath)
+
+      setFormData((prev) => ({ ...prev, [fieldName]: publicUrl }))
       toast.success("Image uploaded successfully!")
     } catch (error) {
       console.error("Upload error:", error)
-      toast.error("Failed to upload image")
+      toast.error(`Failed to upload image: ${error.message}`)
     } finally {
       setUploading(false)
     }
@@ -243,39 +237,45 @@ const AdminStorePage = () => {
         return
       }
 
-      // Mock save - replace with actual Supabase insert/update
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      const cleanedData = {
-        ...formData,
+      const productData = {
+        title: formData.title,
+        description: formData.description,
+        tech_stack: formData.techStack,
         price: formData.isFree ? 0 : Number.parseInt(formData.price) || 0,
-        originalPrice: formData.originalPrice ? Number.parseInt(formData.originalPrice) : null,
+        original_price: formData.originalPrice ? Number.parseInt(formData.originalPrice) : null,
+        category: formData.category,
+        is_popular: formData.isPopular,
+        is_free: formData.isFree,
+        thumbnail: formData.thumbnail || null,
+        gradient: formData.gradient,
+        icon: formData.icon,
+        features: formData.features,
+        downloads: formData.downloads,
         rating: Number.parseFloat(formData.rating) || 4.5,
+        complexity: formData.complexity,
+        download_url: formData.downloadUrl || null,
+        demo_url: formData.demoUrl || null,
+        documentation_url: formData.documentationUrl || null,
+        created_by: user.id,
+        is_published: true,
       }
 
       if (editingProduct) {
         // Update existing product
-        setProducts((prev) =>
-          prev.map((p) =>
-            p.id === editingProduct.id
-              ? { ...cleanedData, id: editingProduct.id, updated_at: new Date().toISOString() }
-              : p,
-          ),
-        )
+        const { error } = await supabase.from("products").update(productData).eq("id", editingProduct.id)
+
+        if (error) throw error
         toast.success("Product updated successfully!")
       } else {
         // Create new product
-        const newProduct = {
-          ...cleanedData,
-          id: `product-${Date.now()}`,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-        setProducts((prev) => [newProduct, ...prev])
+        const { error } = await supabase.from("products").insert([productData])
+
+        if (error) throw error
         toast.success("Product created successfully!")
       }
 
-      // Reset form
+      // Reload products and reset form
+      await loadProducts()
       setTimeout(() => {
         setShowForm(false)
         setEditingProduct(null)
@@ -283,7 +283,7 @@ const AdminStorePage = () => {
       }, 1000)
     } catch (error) {
       console.error("Save error:", error)
-      toast.error("Error saving product. Please try again.")
+      toast.error(`Error saving product: ${error.message}`)
     } finally {
       setUploading(false)
     }
@@ -307,6 +307,9 @@ const AdminStorePage = () => {
       downloads: "0+",
       rating: "4.5",
       complexity: "Intermediate",
+      downloadUrl: "",
+      demoUrl: "",
+      documentationUrl: "",
     })
     setTechInput("")
     setFeatureInput("")
@@ -315,7 +318,26 @@ const AdminStorePage = () => {
   // Handle edit
   const handleEdit = (product) => {
     setEditingProduct(product)
-    setFormData(product)
+    setFormData({
+      title: product.title || "",
+      description: product.description || "",
+      techStack: Array.isArray(product.tech_stack) ? product.tech_stack : [],
+      price: product.price?.toString() || "",
+      originalPrice: product.original_price?.toString() || "",
+      category: product.category || "template",
+      isPopular: product.is_popular || false,
+      isFree: product.is_free || false,
+      thumbnail: product.thumbnail || "",
+      gradient: product.gradient || "from-blue-500 to-purple-500",
+      icon: product.icon || "Code",
+      features: Array.isArray(product.features) ? product.features : [],
+      downloads: product.downloads || "0+",
+      rating: product.rating?.toString() || "4.5",
+      complexity: product.complexity || "Intermediate",
+      downloadUrl: product.download_url || "",
+      demoUrl: product.demo_url || "",
+      documentationUrl: product.documentation_url || "",
+    })
     setShowForm(true)
   }
 
@@ -324,26 +346,35 @@ const AdminStorePage = () => {
     setConfirmModal({
       isOpen: true,
       productId: product.id,
-      productTitle: product.title,
+      productTitle: product.title || "Untitled Product",
     })
   }
 
   // Handle delete
   const handleDelete = async () => {
     try {
-      setProducts((prev) => prev.filter((p) => p.id !== confirmModal.productId))
+      const { error } = await supabase.from("products").delete().eq("id", confirmModal.productId)
+
+      if (error) throw error
+
+      await loadProducts()
       toast.success("Product deleted successfully!")
     } catch (error) {
+      console.error("Delete error:", error)
       toast.error("Failed to delete product")
     }
   }
 
-  // Filter products
+  // Filter products with null safety
   const filteredProducts = products.filter((product) => {
+    const title = product.title || ""
+    const description = product.description || ""
+    const category = product.category || ""
+
     const matchesSearch =
-      product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
+      title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      description.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = selectedCategory === "all" || category === selectedCategory
     return matchesSearch && matchesCategory
   })
 
@@ -366,7 +397,8 @@ const AdminStorePage = () => {
     "Users",
     "CreditCard",
     "Heart",
-    "Zap",
+    "MessageSquare",
+    "Briefcase",
   ]
 
   const gradientOptions = [
@@ -506,12 +538,17 @@ const AdminStorePage = () => {
                     >
                       {/* Product Image */}
                       <div className="relative h-48 overflow-hidden">
-                        <div className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-20`}></div>
+                        <div
+                          className={`absolute inset-0 bg-gradient-to-br ${product.gradient || "from-blue-500 to-purple-500"} opacity-20`}
+                        ></div>
                         {product.thumbnail ? (
                           <img
                             src={product.thumbnail || "/placeholder.svg"}
-                            alt={product.title}
+                            alt={product.title || "Product"}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = "none"
+                            }}
                           />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center">
@@ -520,7 +557,7 @@ const AdminStorePage = () => {
                         )}
 
                         {/* Popular Badge */}
-                        {product.isPopular && (
+                        {product.is_popular && (
                           <div className="absolute top-4 left-4">
                             <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center space-x-1">
                               <Star className="w-3 h-3" />
@@ -532,16 +569,16 @@ const AdminStorePage = () => {
                         {/* Price */}
                         <div className="absolute bottom-4 left-4">
                           <div className="bg-black/80 backdrop-blur-sm px-3 py-2 rounded-xl border border-gray-700">
-                            {product.isFree ? (
+                            {product.is_free ? (
                               <span className="text-green-400 font-bold text-lg flex items-center space-x-1">
                                 <Gift className="w-4 h-4" />
                                 <span>FREE</span>
                               </span>
                             ) : (
                               <div className="flex items-center space-x-2">
-                                <span className="text-white font-bold text-lg">₹{product.price}</span>
-                                {product.originalPrice && (
-                                  <span className="text-gray-400 line-through text-sm">₹{product.originalPrice}</span>
+                                <span className="text-white font-bold text-lg">₹{product.price || 0}</span>
+                                {product.original_price && (
+                                  <span className="text-gray-400 line-through text-sm">₹{product.original_price}</span>
                                 )}
                               </div>
                             )}
@@ -569,30 +606,34 @@ const AdminStorePage = () => {
                       <div className="p-6">
                         <div className="flex items-center justify-between mb-3">
                           <span className="text-blue-400 text-xs font-medium uppercase tracking-wider">
-                            {product.category}
+                            {product.category || "Product"}
                           </span>
                           <div className="flex items-center space-x-1 text-yellow-400">
                             <Star className="w-3 h-3 fill-current" />
-                            <span className="text-xs">{product.rating}</span>
+                            <span className="text-xs">{product.rating || "4.5"}</span>
                           </div>
                         </div>
 
-                        <h3 className="text-xl font-bold text-white mb-2">{product.title}</h3>
-                        <p className="text-gray-400 text-sm mb-4 line-clamp-2">{product.description}</p>
+                        <h3 className="text-xl font-bold text-white mb-2">{product.title || "Untitled Product"}</h3>
+                        <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+                          {product.description || "No description available"}
+                        </p>
 
                         {/* Tech Stack */}
                         <div className="flex flex-wrap gap-1 mb-4">
-                          {product.techStack.slice(0, 3).map((tech, index) => (
-                            <span
-                              key={index}
-                              className="px-2 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded"
-                            >
-                              {tech}
-                            </span>
-                          ))}
-                          {product.techStack.length > 3 && (
+                          {(Array.isArray(product.tech_stack) ? product.tech_stack : [])
+                            .slice(0, 3)
+                            .map((tech, index) => (
+                              <span
+                                key={index}
+                                className="px-2 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded"
+                              >
+                                {tech}
+                              </span>
+                            ))}
+                          {(Array.isArray(product.tech_stack) ? product.tech_stack : []).length > 3 && (
                             <span className="px-2 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded">
-                              +{product.techStack.length - 3}
+                              +{product.tech_stack.length - 3}
                             </span>
                           )}
                         </div>
@@ -601,9 +642,9 @@ const AdminStorePage = () => {
                         <div className="flex items-center justify-between text-sm">
                           <div className="flex items-center space-x-1 text-blue-400">
                             <Download className="w-3 h-3" />
-                            <span>{product.downloads}</span>
+                            <span>{product.downloads || "0+"}</span>
                           </div>
-                          <div className="text-gray-400">{product.complexity}</div>
+                          <div className="text-gray-400">{product.complexity || "Intermediate"}</div>
                         </div>
                       </div>
                     </div>
@@ -929,6 +970,52 @@ const AdminStorePage = () => {
                   </div>
                 </div>
 
+                {/* URLs */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-bold text-white flex items-center space-x-2">
+                    <Globe className="w-5 h-5 text-blue-400" />
+                    <span>Product URLs</span>
+                  </h3>
+
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <div>
+                      <label className="block text-gray-300 font-medium mb-2">Download URL</label>
+                      <input
+                        type="url"
+                        name="downloadUrl"
+                        value={formData.downloadUrl}
+                        onChange={handleInputChange}
+                        className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
+                        placeholder="https://..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-300 font-medium mb-2">Demo URL</label>
+                      <input
+                        type="url"
+                        name="demoUrl"
+                        value={formData.demoUrl}
+                        onChange={handleInputChange}
+                        className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
+                        placeholder="https://..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-300 font-medium mb-2">Documentation URL</label>
+                      <input
+                        type="url"
+                        name="documentationUrl"
+                        value={formData.documentationUrl}
+                        onChange={handleInputChange}
+                        className="w-full bg-gray-800/50 border border-gray-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-blue-500/50 transition-all duration-300"
+                        placeholder="https://..."
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 {/* Visual Settings */}
                 <div className="space-y-6">
                   <h3 className="text-xl font-bold text-white flex items-center space-x-2">
@@ -1085,4 +1172,3 @@ const AdminStorePage = () => {
 }
 
 export default AdminStorePage
-    

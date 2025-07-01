@@ -26,6 +26,7 @@ const ProjectCard = ({ project }) => {
   } = project
 
   const complexityColors = {
+    Low: "text-green-400 bg-green-500/10 border-green-500/30",
     Medium: "text-yellow-400 bg-yellow-500/10 border-yellow-500/30",
     High: "text-orange-400 bg-orange-500/10 border-orange-500/30",
     "Very High": "text-red-400 bg-red-500/10 border-red-500/30",
@@ -50,7 +51,7 @@ const ProjectCard = ({ project }) => {
           <div
             className={`w-10 h-10 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300`}
           >
-            <IconComponent className="w-5 h-5 text-white" />
+            {IconComponent && <IconComponent className="w-5 h-5 text-white" />}
           </div>
         </div>
 
@@ -62,11 +63,13 @@ const ProjectCard = ({ project }) => {
               <span>{status}</span>
             </span>
           </div>
-          <div
-            className={`px-2 py-1 rounded-lg backdrop-blur-sm border text-xs font-medium ${complexityColors[complexity]}`}
-          >
-            {complexity}
-          </div>
+          {complexity && (
+            <div
+              className={`px-2 py-1 rounded-lg backdrop-blur-sm border text-xs font-medium ${complexityColors[complexity] || complexityColors.Medium}`}
+            >
+              {complexity}
+            </div>
+          )}
         </div>
 
         {/* Year & Duration */}
@@ -77,12 +80,14 @@ const ProjectCard = ({ project }) => {
               <span className="text-xs font-medium">{year}</span>
             </div>
           </div>
-          <div className="bg-black/60 backdrop-blur-sm border border-gray-700/50 px-2 py-1 rounded-lg">
-            <div className="flex items-center space-x-1 text-white">
-              <Clock className="w-3 h-3" />
-              <span className="text-xs font-medium">{duration}</span>
+          {duration && (
+            <div className="bg-black/60 backdrop-blur-sm border border-gray-700/50 px-2 py-1 rounded-lg">
+              <div className="flex items-center space-x-1 text-white">
+                <Clock className="w-3 h-3" />
+                <span className="text-xs font-medium">{duration}</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Placeholder Image */}
@@ -99,30 +104,34 @@ const ProjectCard = ({ project }) => {
           <h3 className="text-xl font-black text-white mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all duration-300">
             {title}
           </h3>
-          <div className="text-sm text-gray-400 font-medium mb-2">{subtitle}</div>
+          {subtitle && <div className="text-sm text-gray-400 font-medium mb-2">{subtitle}</div>}
         </div>
 
         {/* Description */}
         <p className="text-gray-300 text-sm leading-relaxed mb-4 line-clamp-3">{description}</p>
 
         {/* Impact */}
-        <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl p-3 mb-4">
-          <div className="flex items-center space-x-2 mb-1">
-            <TrendingUp className="w-3 h-3 text-blue-400" />
-            <span className="text-blue-400 font-semibold text-xs">Impact</span>
+        {impact && (
+          <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl p-3 mb-4">
+            <div className="flex items-center space-x-2 mb-1">
+              <TrendingUp className="w-3 h-3 text-blue-400" />
+              <span className="text-blue-400 font-semibold text-xs">Impact</span>
+            </div>
+            <p className="text-white font-medium text-xs">{impact}</p>
           </div>
-          <p className="text-white font-medium text-xs">{impact}</p>
-        </div>
+        )}
 
         {/* Metrics */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          {Object.entries(metrics).map(([key, value], idx) => (
-            <div key={idx} className="text-center">
-              <div className="text-sm font-black text-white mb-1">{value}</div>
-              <div className="text-gray-400 text-xs capitalize">{key}</div>
-            </div>
-          ))}
-        </div>
+        {metrics && Object.keys(metrics).length > 0 && (
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {Object.entries(metrics).map(([key, value], idx) => (
+              <div key={idx} className="text-center">
+                <div className="text-sm font-black text-white mb-1">{value}</div>
+                <div className="text-gray-400 text-xs capitalize">{key}</div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Tech Stack */}
         <div className="mb-4">
@@ -174,14 +183,16 @@ const ProjectCard = ({ project }) => {
             </Link>
           )}
 
-          <Link
-            href={detailsUrl}
-            className="group flex items-center space-x-1 border-2 border-white hover:bg-white hover:text-black text-white px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-300 hover:scale-105"
-          >
-            <BookOpen className="w-3 h-3" />
-            <span>Details</span>
-            <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform duration-300" />
-          </Link>
+          {detailsUrl && (
+            <Link
+              href={detailsUrl}
+              className="group flex items-center space-x-1 border-2 border-white hover:bg-white hover:text-black text-white px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-300 hover:scale-105"
+            >
+              <BookOpen className="w-3 h-3" />
+              <span>Details</span>
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform duration-300" />
+            </Link>
+          )}
         </div>
       </div>
 
