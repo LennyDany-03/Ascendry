@@ -5,6 +5,7 @@ import Navbar from "../../components/navbar.jsx"
 import Footer from "../../components/footer.jsx"
 import InteractiveBackground from "../../components/interactive-background"
 import Link from "next/link"
+import { hireMeAPI } from "../../lib/supabaseClient"
 
 const HirePage = () => {
   const [formData, setFormData] = useState({
@@ -24,6 +25,8 @@ const HirePage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showTickAnimation, setShowTickAnimation] = useState(false)
+  const [submitError, setSubmitError] = useState("")
+  const [uploadProgress, setUploadProgress] = useState(0)
   const fileInputRef = useRef(null)
 
   const handleInputChange = (e) => {
@@ -35,19 +38,80 @@ const HirePage = () => {
 
   const handleFileUpload = (e) => {
     const files = Array.from(e.target.files)
-    setAttachments(files)
+    const maxSize = 10 * 1024 * 1024 // 10MB
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "application/zip",
+      "application/x-zip-compressed",
+    ]
+
+    const validFiles = files.filter((file) => {
+      if (file.size > maxSize) {
+        alert(`File ${file.name} is too large. Maximum size is 10MB.`)
+        return false
+      }
+      if (!allowedTypes.includes(file.type)) {
+        alert(`File ${file.name} has an unsupported format.`)
+        return false
+      }
+      return true
+    })
+
+    setAttachments(validFiles)
   }
 
   const removeFile = (index) => {
     setAttachments(attachments.filter((_, i) => i !== index))
   }
 
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return "0 Bytes"
+    const k = 1024
+    const sizes = ["Bytes", "KB", "MB", "GB"]
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setSubmitError("")
+    setUploadProgress(0)
 
-    // Simulate form submission
-    setTimeout(() => {
+    try {
+      // Prepare form data for submission - convert empty strings to null for optional fields
+      const submissionData = {
+        full_name: formData.fullName,
+        email: formData.email,
+        company: formData.company || null,
+        project_type: formData.projectType,
+        budget: formData.budget,
+        timeline: formData.timeline,
+        project_description: formData.projectDescription,
+        contact_method: formData.contactMethod,
+        available_time: formData.availableTime || null,
+        available_date: formData.availableDate || null, // Convert empty string to null
+        hear_about: formData.hearAbout || null,
+        status: "new",
+        priority: "medium",
+      }
+
+      // Show upload progress if files are present
+      if (attachments.length > 0) {
+        setUploadProgress(25)
+      }
+
+      // Submit to Supabase with file uploads
+      await hireMeAPI.submit(submissionData, attachments)
+
+      setUploadProgress(100)
       setIsSubmitting(false)
       setShowSuccessModal(true)
 
@@ -71,13 +135,19 @@ const HirePage = () => {
         hearAbout: "",
       })
       setAttachments([])
+      setUploadProgress(0)
 
       // Auto close modal after 4 seconds
       setTimeout(() => {
         setShowSuccessModal(false)
         setShowTickAnimation(false)
       }, 4000)
-    }, 2500)
+    } catch (error) {
+      console.error("Form submission error:", error)
+      setSubmitError("Failed to submit form. Please try again.")
+      setIsSubmitting(false)
+      setUploadProgress(0)
+    }
   }
 
   const closeModal = () => {
@@ -166,6 +236,11 @@ const HirePage = () => {
               <p className="text-lg text-gray-300 leading-relaxed">
                 Thanks for reaching out! I'll get back to you within 24-48 hours.
               </p>
+              {attachments.length > 0 && (
+                <p className="text-sm text-blue-400">
+                  📎 {attachments.length} file{attachments.length > 1 ? "s" : ""} uploaded successfully
+                </p>
+              )}
               <p className="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
                 Let's build something amazing together!
               </p>
@@ -220,6 +295,37 @@ const HirePage = () => {
           </p>
         </div>
       </section>
+
+      {/* Error Message */}
+      {submitError && (
+        <div className="max-w-5xl mx-auto px-6 mb-8">
+          <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-4 text-center">
+            <p className="text-red-400">{submitError}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Upload Progress */}
+      {isSubmitting && uploadProgress > 0 && (
+        <div className="max-w-5xl mx-auto px-6 mb-8">
+          <div className="bg-gray-900/50 border border-gray-700/50 rounded-2xl p-6">
+            <div className="flex items-center space-x-4">
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-gray-300 font-medium">Uploading files...</span>
+                  <span className="text-blue-400 font-bold">{uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modern Form Section */}
       <section className="py-20 relative">
@@ -388,7 +494,7 @@ const HirePage = () => {
                 {/* File Attachments */}
                 <div className="mt-8 space-y-3">
                   <label className="block text-gray-300 font-medium">
-                    Attachments <span className="text-gray-500">(Optional)</span>
+                    Attachments <span className="text-gray-500">(Optional - Max 10MB per file)</span>
                   </label>
                   <div className="space-y-4">
                     <div
@@ -397,7 +503,8 @@ const HirePage = () => {
                     >
                       <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">📎</div>
                       <p className="text-gray-400 mb-2 text-lg">Drop files here or click to upload</p>
-                      <p className="text-gray-500">Share briefs, docs, or reference files</p>
+                      <p className="text-gray-500">PDF, DOC, TXT, Images, ZIP files supported</p>
+                      <p className="text-gray-600 text-sm mt-2">Maximum 10MB per file</p>
                     </div>
                     <input
                       ref={fileInputRef}
@@ -405,22 +512,33 @@ const HirePage = () => {
                       multiple
                       onChange={handleFileUpload}
                       className="hidden"
-                      accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
+                      accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.webp,.zip"
                     />
 
                     {/* File List */}
                     {attachments.length > 0 && (
                       <div className="space-y-3">
+                        <h4 className="text-gray-300 font-medium">Selected Files:</h4>
                         {attachments.map((file, index) => (
                           <div
                             key={index}
                             className="flex items-center justify-between bg-black/40 backdrop-blur-sm rounded-xl px-4 py-3 border border-gray-600/50"
                           >
-                            <span className="text-gray-300">{file.name}</span>
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                <span className="text-blue-400 text-xs font-bold">
+                                  {file.name.split(".").pop().toUpperCase()}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-gray-300 font-medium">{file.name}</span>
+                                <div className="text-gray-500 text-sm">{formatFileSize(file.size)}</div>
+                              </div>
+                            </div>
                             <button
                               type="button"
                               onClick={() => removeFile(index)}
-                              className="text-red-400 hover:text-red-300 transition-colors duration-300 p-1"
+                              className="text-red-400 hover:text-red-300 transition-colors duration-300 p-2 hover:bg-red-500/10 rounded-lg"
                             >
                               ✕
                             </button>
@@ -528,10 +646,10 @@ const HirePage = () => {
                   <span className="text-2xl">🔒</span>
                 </div>
                 <div>
-                  <h4 className="text-white font-bold mb-2 text-lg">Confidentiality Guarantee</h4>
+                  <h4 className="text-white font-bold mb-2 text-lg">Confidentiality & File Security</h4>
                   <p className="text-gray-400 leading-relaxed">
-                    All submissions are confidential. I respect your privacy and never share your data. Your project
-                    details are completely safe with me.
+                    All submissions and file uploads are confidential and securely stored. I respect your privacy and
+                    never share your data. Your project details and attachments are completely safe with me.
                   </p>
                 </div>
               </div>
@@ -550,7 +668,7 @@ const HirePage = () => {
                   {isSubmitting ? (
                     <>
                       <div className="w-6 h-6 border-3 border-black border-t-transparent rounded-full animate-spin"></div>
-                      <span>Processing Request...</span>
+                      <span>{uploadProgress > 0 ? `Uploading... ${uploadProgress}%` : "Submitting Request..."}</span>
                     </>
                   ) : (
                     <>
@@ -571,73 +689,73 @@ const HirePage = () => {
 
       {/* Custom Styles */}
       <style jsx>{`
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
+      @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
 
-        @keyframes scale-in {
-          from { 
-            opacity: 0; 
-            transform: scale(0.8) translateY(20px); 
-          }
-          to { 
-            opacity: 1; 
-            transform: scale(1) translateY(0); 
-          }
+      @keyframes scale-in {
+        from { 
+          opacity: 0; 
+          transform: scale(0.8) translateY(20px); 
         }
+        to { 
+          opacity: 1; 
+          transform: scale(1) translateY(0); 
+        }
+      }
 
-        @keyframes tick-circle {
-          0% { 
-            transform: scale(0.8); 
-            border-color: #6b7280; 
-          }
-          50% { 
-            transform: scale(1.1); 
-            border-color: #10b981; 
-          }
-          100% { 
-            transform: scale(1); 
-            border-color: #10b981; 
-          }
+      @keyframes tick-circle {
+        0% { 
+          transform: scale(0.8); 
+          border-color: #6b7280; 
         }
+        50% { 
+          transform: scale(1.1); 
+          border-color: #10b981; 
+        }
+        100% { 
+          transform: scale(1); 
+          border-color: #10b981; 
+        }
+      }
 
-        @keyframes tick-draw {
-          0% { 
-            opacity: 0;
-            stroke-dasharray: 0 50;
-          }
-          50% { 
-            opacity: 1;
-            stroke-dasharray: 25 50;
-          }
-          100% { 
-            opacity: 1;
-            stroke-dasharray: 50 50;
-          }
+      @keyframes tick-draw {
+        0% { 
+          opacity: 0;
+          stroke-dasharray: 0 50;
         }
+        50% { 
+          opacity: 1;
+          stroke-dasharray: 25 50;
+        }
+        100% { 
+          opacity: 1;
+          stroke-dasharray: 50 50;
+        }
+      }
 
-        .animate-fade-in {
-          animation: fade-in 0.3s ease-out forwards;
-        }
+      .animate-fade-in {
+        animation: fade-in 0.3s ease-out forwards;
+      }
 
-        .animate-scale-in {
-          animation: scale-in 0.4s ease-out forwards;
-        }
+      .animate-scale-in {
+        animation: scale-in 0.4s ease-out forwards;
+      }
 
-        .animate-tick-circle {
-          animation: tick-circle 0.6s ease-out forwards;
-        }
+      .animate-tick-circle {
+        animation: tick-circle 0.6s ease-out forwards;
+      }
 
-        .animate-tick-draw {
-          animation: tick-draw 0.8s ease-out 0.3s forwards;
-        }
+      .animate-tick-draw {
+        animation: tick-draw 0.8s ease-out 0.3s forwards;
+      }
 
-        .tick-path {
-          stroke-dasharray: 50;
-          stroke-dashoffset: 50;
-        }
-      `}</style>
+      .tick-path {
+        stroke-dasharray: 50;
+        stroke-dashoffset: 50;
+      }
+    `}</style>
     </div>
   )
 }

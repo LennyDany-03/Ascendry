@@ -34,7 +34,6 @@ const Navbar = () => {
     { name: "Services", href: "services" },
     { name: "Projects", href: "projects" },
     { name: "Store", href: "store" },
-    { name: "Blog", href: "blog" },
     { name: "Contact", href: "contact" },
   ]
 
@@ -162,7 +161,7 @@ const Navbar = () => {
                 </Link>
               ))}
               <Link
-                href="#contact"
+                href="hire"
                 className="block bg-white text-black px-4 py-3 mt-4 text-center font-semibold rounded-lg hover:bg-gray-200 transition-all duration-300"
                 onClick={() => setIsOpen(false)}
               >

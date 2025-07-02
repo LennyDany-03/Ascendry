@@ -119,3 +119,5 @@ const Toast = ({ toast, onRemove }) => {
     </div>
   )
 }
+
+export default ToastProvider

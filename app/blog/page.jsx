@@ -1,132 +1,84 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Navbar from "../../components/navbar.jsx"
 import Footer from "../../components/footer.jsx"
 import InteractiveBackground from "../../components/interactive-background"
-import BlogCard from "../../components/blog-card.jsx"
-import { Search, Filter, BookOpen, Users, TrendingUp, Clock } from "lucide-react"
+import { Code, Rocket, Zap, BookOpen, Coffee, Lightbulb, Clock, Github, Twitter } from "lucide-react"
 
 const BlogPage = () => {
-  const [selectedTag, setSelectedTag] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [progress, setProgress] = useState(0)
+  const [currentFeature, setCurrentFeature] = useState(0)
 
-  const blogPosts = [
-    {
-      id: "building-novapay-case-study",
-      title: "Building NovaPay: From Scratch to Production",
-      excerpt:
-        "Learn how I built NovaPay with Supabase, React, and Vercel. Includes deployment tips, challenges faced, and lessons learned during development.",
-      date: "2024-12-15",
-      tags: ["React", "Supabase", "FinanceApp", "CaseStudy"],
-      readTime: "8 min read",
-      thumbnail: "/placeholder.svg?height=200&width=400",
-      featured: true,
-    },
-    {
-      id: "church-ministry-website-guide",
-      title: "Church Ministry Website with Media Gallery",
-      excerpt:
-        "Complete guide to building a modern church website with event management, donation integration, and media galleries using Next.js and Sanity CMS.",
-      date: "2024-12-10",
-      tags: ["NextJS", "SanityCMS", "WebDev", "CaseStudy"],
-      readTime: "12 min read",
-      thumbnail: "/placeholder.svg?height=200&width=400",
-    },
-    {
-      id: "supabase-vs-firebase-comparison",
-      title: "Supabase vs Firebase for Indie Developers",
-      excerpt:
-        "Detailed comparison of Supabase and Firebase from an indie developer's perspective. Pricing, features, developer experience, and real-world usage scenarios.",
-      date: "2024-12-05",
-      tags: ["Supabase", "Firebase", "Backend", "Opinion"],
-      readTime: "10 min read",
-      thumbnail: "/placeholder.svg?height=200&width=400",
-    },
-    {
-      id: "tamil-english-chatbot-gemini",
-      title: "Building a Tamil + English Chatbot using Gemini",
-      excerpt:
-        "Step-by-step guide to creating a multilingual healthcare chatbot that supports both Tamil and English using Google's Gemini AI and natural language processing.",
-      date: "2024-11-28",
-      tags: ["AI", "Gemini", "NLP", "Python", "Tutorial"],
-      readTime: "15 min read",
-      thumbnail: "/placeholder.svg?height=200&width=400",
-    },
-    {
-      id: "gumroad-student-developer-guide",
-      title: "Earning via Gumroad as a Student Developer",
-      excerpt:
-        "How I started selling digital products on Gumroad as a student. Tips for pricing, marketing, product creation, and building a sustainable income stream.",
-      date: "2024-11-20",
-      tags: ["Gumroad", "Monetization", "StudentLife", "Guide"],
-      readTime: "7 min read",
-      thumbnail: "/placeholder.svg?height=200&width=400",
-    },
-    {
-      id: "clubsphere-hackathon-story",
-      title: "How We Built ClubSphere: College Hackathon Project",
-      excerpt:
-        "The story behind ClubSphere - from hackathon idea to production-ready college club management system. Team dynamics, technical challenges, and key learnings.",
-      date: "2024-11-15",
-      tags: ["Hackathon", "TeamWork", "React", "Story"],
-      readTime: "6 min read",
-      thumbnail: "/placeholder.svg?height=200&width=400",
-    },
-    {
-      id: "react-performance-optimization",
-      title: "React Performance Optimization: Real-World Tips",
-      excerpt:
-        "Practical React performance optimization techniques I've learned from building production apps. Code splitting, memoization, and bundle optimization strategies.",
-      date: "2024-11-08",
-      tags: ["React", "Performance", "Optimization", "Tutorial"],
-      readTime: "11 min read",
-      thumbnail: "/placeholder.svg?height=200&width=400",
-    },
-    {
-      id: "tailwind-css-component-library",
-      title: "Building a Reusable Component Library with Tailwind",
-      excerpt:
-        "How to create and maintain a scalable component library using Tailwind CSS. Design tokens, component variants, and documentation best practices.",
-      date: "2024-11-01",
-      tags: ["TailwindCSS", "ComponentLibrary", "DesignSystem", "Tutorial"],
-      readTime: "9 min read",
-      thumbnail: "/placeholder.svg?height=200&width=400",
-    },
+  const features = [
+    "Interactive Code Examples",
+    "Real-time Tutorials",
+    "Project Case Studies",
+    "Tech Deep Dives",
+    "Developer Stories",
   ]
 
-  const allTags = ["all", ...new Set(blogPosts.flatMap((post) => post.tags))]
+  useEffect(() => {
+    // Simulate progress loading
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 85) {
+          clearInterval(progressInterval)
+          return 85
+        }
+        return prev + Math.random() * 3
+      })
+    }, 200)
 
-  const filteredPosts =
-    selectedTag === "all"
-      ? blogPosts.filter(
-          (post) =>
-            post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            post.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
-        )
-      : blogPosts.filter(
-          (post) =>
-            post.tags.includes(selectedTag) &&
-            (post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              post.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))),
-        )
+    // Cycle through features
+    const featureInterval = setInterval(() => {
+      setCurrentFeature((prev) => (prev + 1) % features.length)
+    }, 2000)
 
-  const featuredPost = blogPosts.find((post) => post.featured)
-  const regularPosts = filteredPosts.filter((post) => !post.featured)
+    return () => {
+      clearInterval(progressInterval)
+      clearInterval(featureInterval)
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       <InteractiveBackground />
       <Navbar />
 
-      {/* Floating Particles - Reduced */}
+      {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(10)].map((_, i) => (
+        {/* Floating Code Blocks */}
+        {[...Array(8)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-blue-500/20 rounded-full animate-pulse"
+            className="absolute opacity-10 text-blue-400 font-mono text-xs animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${8 + Math.random() * 4}s`,
+            }}
+          >
+            {
+              ["const blog = () => {}", "function render()", "import React", "export default", "// Coming Soon"][
+                Math.floor(Math.random() * 5)
+              ]
+            }
+          </div>
+        ))}
+
+        {/* Floating Geometric Shapes */}
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className={`absolute animate-pulse ${
+              i % 3 === 0
+                ? "w-2 h-2 bg-blue-500/20 rounded-full"
+                : i % 3 === 1
+                  ? "w-3 h-3 border border-purple-500/20 rotate-45"
+                  : "w-2 h-2 bg-gradient-to-r from-pink-500/20 to-blue-500/20"
+            }`}
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -137,337 +89,320 @@ const BlogPage = () => {
         ))}
       </div>
 
-      {/* Compact Hero Section */}
-      <section className="pt-24 pb-12 relative">
-        <br />
-        {/* Smaller Geometric Shapes */}
-        <div className="absolute top-16 left-10 w-12 h-12 border border-blue-500/20 rotate-45 animate-spin-slow"></div>
-        <div className="absolute top-20 right-20 w-10 h-10 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rotate-12 animate-pulse"></div>
-        <div className="absolute bottom-8 left-1/4 w-8 h-8 border border-pink-500/30 rounded-full animate-bounce"></div>
-
-        <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
-          {/* Compact Welcome Badge */}
-          <div className="mb-6">
-            <div className="inline-flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-6 group hover:border-blue-500/40 transition-all duration-300">
-              <div className="w-1.5 h-1.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-medium text-xs">
-                Tech Insights & Stories
+      {/* Main Content */}
+      <section className="pt-32 pb-20 relative z-10">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          {/* Status Badge */}
+          <div className="mb-8">
+            <div className="inline-flex items-center space-x-3 px-6 py-3 bg-gradient-to-r from-orange-500/10 to-red-500/10 backdrop-blur-sm border border-orange-500/20 rounded-full group hover:border-orange-500/40 transition-all duration-300">
+              <div className="relative">
+                <div className="w-3 h-3 bg-gradient-to-r from-orange-500 to-red-500 rounded-full animate-pulse"></div>
+                <div className="absolute inset-0 w-3 h-3 bg-gradient-to-r from-orange-500 to-red-500 rounded-full animate-ping opacity-75"></div>
+              </div>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400 font-bold text-sm">
+                UNDER DEVELOPMENT
               </span>
             </div>
           </div>
 
-          {/* Compact Main Heading */}
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-6 relative">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-white">
-              READ.
-            </span>{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-              LEARN.
-            </span>{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-100 to-white">
-              ASCEND.
-            </span>
-          </h1>
+          {/* Main Heading with Animation */}
+          <div className="mb-8">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 relative">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-white animate-pulse">
+                BLOG
+              </span>
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 animate-gradient-x">
+                COMING SOON
+              </span>
+            </h1>
 
-          <p className="text-base text-gray-400 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Dive deep into development insights, tutorials, and real-world project stories.
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-              Code smarter, build faster, grow stronger.
+            {/* Animated Underline */}
+            <div className="relative mx-auto w-64 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent rounded-full overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
+            </div>
+          </div>
+
+          {/* Description */}
+          <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
+            We're crafting something{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-bold">
+              extraordinary
+            </span>{" "}
+            for you.
+            <br />
+            <span className="text-lg text-gray-400 mt-2 block">
+              A space where code meets creativity, tutorials meet innovation, and developers find inspiration.
             </span>
           </p>
 
-          {/* Compact CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <button
-              onClick={() => document.getElementById("featured-post")?.scrollIntoView({ behavior: "smooth" })}
-              className="group relative px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-              <span className="relative flex items-center space-x-2 text-sm">
-                <BookOpen className="w-4 h-4" />
-                <span>Read Featured</span>
-              </span>
-            </button>
+          {/* Progress Section */}
+          <div className="mb-16 max-w-2xl mx-auto">
+            <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-            <button
-              onClick={() => document.getElementById("all-posts")?.scrollIntoView({ behavior: "smooth" })}
-              className="group px-4 py-2 border border-gray-600 text-white font-semibold rounded-xl hover:border-blue-500 hover:bg-blue-500/10 transition-all duration-300 hover:scale-105"
-            >
-              <span className="flex items-center space-x-2 text-sm">
-                <Filter className="w-4 h-4" />
-                <span>Browse All</span>
-              </span>
-            </button>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-gray-300 font-semibold">Development Progress</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-bold">
+                    {Math.round(progress)}%
+                  </span>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="w-full bg-gray-800 rounded-full h-3 mb-6 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
+                    style={{ width: `${progress}%` }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+                  </div>
+                </div>
+
+                {/* Current Feature */}
+                <div className="text-center">
+                  <p className="text-gray-400 text-sm mb-2">Currently Working On:</p>
+                  <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-bold text-lg">
+                    {features[currentFeature]}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Compact Stats Grid */}
-          <div className="grid grid-cols-4 gap-4 max-w-3xl mx-auto">
+          {/* Features Preview Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16 max-w-5xl mx-auto">
             {[
               {
-                icon: BookOpen,
-                number: `${blogPosts.length}+`,
-                label: "Articles",
-                color: "from-blue-500 to-purple-500",
+                icon: Code,
+                title: "Interactive Tutorials",
+                description: "Step-by-step coding guides with live examples",
+                color: "from-blue-500 to-cyan-500",
+                delay: "0s",
               },
-              { icon: Users, number: "10K+", label: "Readers", color: "from-purple-500 to-pink-500" },
-              { icon: TrendingUp, number: "50+", label: "Examples", color: "from-pink-500 to-blue-500" },
-              { icon: Clock, number: "100+", label: "Hours", color: "from-blue-500 to-pink-500" },
-            ].map((stat, index) => (
+              {
+                icon: Rocket,
+                title: "Project Showcases",
+                description: "Deep dives into real-world development projects",
+                color: "from-purple-500 to-pink-500",
+                delay: "0.2s",
+              },
+              {
+                icon: Lightbulb,
+                title: "Tech Insights",
+                description: "Latest trends and breakthrough technologies",
+                color: "from-orange-500 to-red-500",
+                delay: "0.4s",
+              },
+              {
+                icon: Coffee,
+                title: "Developer Stories",
+                description: "Behind-the-scenes of building amazing products",
+                color: "from-green-500 to-teal-500",
+                delay: "0.6s",
+              },
+              {
+                icon: Zap,
+                title: "Quick Tips",
+                description: "Productivity hacks and development shortcuts",
+                color: "from-yellow-500 to-orange-500",
+                delay: "0.8s",
+              },
+              {
+                icon: BookOpen,
+                title: "Learning Paths",
+                description: "Structured guides for mastering new skills",
+                color: "from-indigo-500 to-purple-500",
+                delay: "1s",
+              },
+            ].map((feature, index) => (
               <div
                 key={index}
-                className="group text-center p-3 rounded-xl bg-gradient-to-br from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300 hover:scale-105"
+                className="group bg-gradient-to-br from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 hover:border-gray-600/50 transition-all duration-500 hover:scale-105 animate-fade-in-up"
+                style={{ animationDelay: feature.delay }}
               >
                 <div
-                  className={`w-6 h-6 mx-auto mb-2 rounded-lg bg-gradient-to-r ${stat.color} p-1 group-hover:rotate-12 transition-transform duration-300`}
+                  className={`w-12 h-12 rounded-lg bg-gradient-to-r ${feature.color} p-3 mb-4 group-hover:rotate-12 transition-transform duration-300`}
                 >
-                  <stat.icon className="w-full h-full text-white" />
+                  <feature.icon className="w-full h-full text-white" />
                 </div>
-                <div className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 mb-1">
-                  {stat.number}
-                </div>
-                <div className="text-gray-400 text-xs group-hover:text-gray-300 transition-colors duration-300">
-                  {stat.label}
-                </div>
+                <h3 className="text-lg font-bold text-white mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all duration-300">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors duration-300">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* Compact Search & Filter Section */}
-      <section className="py-8 bg-gradient-to-b from-gray-950/50 to-black relative">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.05),transparent_70%)]"></div>
+          {/* Timeline */}
+          <div className="mb-16 max-w-3xl mx-auto">
+            <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 relative overflow-hidden">
+              <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-6 text-center">
+                Development Timeline
+              </h3>
 
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-4">
-              <Search className="w-3 h-3 text-blue-400" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-medium text-xs">
-                Find Your Next Read
-              </span>
-            </div>
-            <h2 className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 mb-4">
-              Explore by Topic
-            </h2>
-          </div>
-
-          {/* Compact Search Bar */}
-          <div className="max-w-xl mx-auto mb-8">
-            <div className="relative group">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-400 transition-colors duration-300" />
-              <input
-                type="text"
-                placeholder="Search articles..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-gradient-to-r from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 text-white pl-10 pr-4 py-2 rounded-xl focus:outline-none focus:border-blue-500/50 focus:bg-gray-900/70 transition-all duration-300 placeholder-gray-400 text-sm"
-              />
-            </div>
-          </div>
-
-          {/* Compact Tags Filter */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            {allTags.slice(0, 8).map((tag) => (
-              <button
-                key={tag}
-                onClick={() => setSelectedTag(tag)}
-                className={`group px-3 py-2 rounded-xl font-medium transition-all duration-300 hover:scale-105 text-xs ${
-                  selectedTag === tag
-                    ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/25"
-                    : "bg-gradient-to-r from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 text-gray-300 hover:border-gray-600/50 hover:text-white"
-                }`}
-              >
-                {tag === "all" ? "All" : `#${tag}`}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Compact Featured Post */}
-      {featuredPost && (
-        <section id="featured-post" className="py-12 bg-black relative">
-          <div className="max-w-7xl mx-auto px-6 relative z-10">
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-pink-500/10 to-blue-500/10 backdrop-blur-sm border border-pink-500/20 rounded-full mb-4">
-                <TrendingUp className="w-3 h-3 text-pink-400" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-blue-400 font-medium text-xs">
-                  Featured Article
-                </span>
-              </div>
-              <h2 className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300">
-                Latest Deep Dive
-              </h2>
-            </div>
-
-            <div className="max-w-4xl mx-auto">
-              <div className="group bg-gradient-to-br from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl overflow-hidden hover:border-gray-600/50 transition-all duration-500 hover:scale-[1.01] hover:shadow-xl hover:shadow-blue-500/10">
-                <div className="grid lg:grid-cols-2 gap-0">
-                  {/* Compact Image */}
-                  <div className="relative h-40 lg:h-48 bg-gradient-to-br from-blue-500/20 to-purple-500/20 overflow-hidden">
-                    <img
-                      src={featuredPost.thumbnail || "/placeholder.svg"}
-                      alt={featuredPost.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-transparent to-purple-500/20 group-hover:opacity-80 transition-opacity duration-500"></div>
-                    <div className="absolute top-4 left-4">
-                      <div className="px-2 py-1 bg-gradient-to-r from-pink-500 to-blue-500 text-white text-xs font-bold rounded-full">
-                        FEATURED
+              <div className="space-y-4">
+                {[
+                  { phase: "Phase 1", task: "Content Management System", status: "completed", date: "Dec 2024" },
+                  { phase: "Phase 2", task: "Interactive Code Editor", status: "in-progress", date: "Jan 2025" },
+                  { phase: "Phase 3", task: "Comment System & Community", status: "upcoming", date: "Feb 2025" },
+                  { phase: "Phase 4", task: "Advanced Search & Filtering", status: "upcoming", date: "Mar 2025" },
+                ].map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center space-x-4 p-4 rounded-lg bg-gray-800/30 border border-gray-700/30"
+                  >
+                    <div
+                      className={`w-3 h-3 rounded-full ${
+                        item.status === "completed"
+                          ? "bg-green-500"
+                          : item.status === "in-progress"
+                            ? "bg-blue-500 animate-pulse"
+                            : "bg-gray-500"
+                      }`}
+                    ></div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-white">{item.phase}</span>
+                        <span className="text-xs text-gray-400">{item.date}</span>
                       </div>
+                      <p className="text-sm text-gray-300">{item.task}</p>
+                    </div>
+                    <div
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        item.status === "completed"
+                          ? "bg-green-500/20 text-green-400"
+                          : item.status === "in-progress"
+                            ? "bg-blue-500/20 text-blue-400"
+                            : "bg-gray-500/20 text-gray-400"
+                      }`}
+                    >
+                      {item.status.replace("-", " ")}
                     </div>
                   </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
-                  {/* Compact Content */}
-                  <div className="p-4 lg:p-6 flex flex-col justify-center">
-                    <div className="flex items-center space-x-3 mb-3 text-xs text-gray-400">
-                      <span>{new Date(featuredPost.date).toLocaleDateString()}</span>
-                      <span>•</span>
-                      <span>{featuredPost.readTime}</span>
-                    </div>
+          {/* Call to Action */}
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                    <h3 className="text-lg lg:text-xl font-black text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all duration-500 leading-tight">
-                      {featuredPost.title}
-                    </h3>
+              <div className="relative z-10">
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  Want to be{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                    notified
+                  </span>{" "}
+                  when we launch?
+                </h3>
 
-                    <p className="text-gray-400 text-sm mb-4 leading-relaxed group-hover:text-gray-300 transition-colors duration-300 line-clamp-3">
-                      {featuredPost.excerpt}
-                    </p>
+                <p className="text-gray-400 mb-6">
+                  Join our community and be the first to access exclusive content, tutorials, and insights.
+                </p>
 
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {featuredPost.tags.slice(0, 3).map((tag, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 text-blue-300 text-xs rounded-lg"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <div className="flex space-x-4">
+                    <a
+                      href="https://github.com"
+                      className="group/btn flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-gray-800 to-gray-700 border border-gray-600 text-white font-semibold rounded-xl hover:border-gray-500 transition-all duration-300 hover:scale-105"
+                    >
+                      <Github className="w-5 h-5" />
+                      <span>Follow on GitHub</span>
+                    </a>
 
                     <a
-                      href={`/blog/${featuredPost.id}`}
-                      className="group/btn relative px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 inline-flex items-center justify-center"
+                      href="https://twitter.com"
+                      className="group/btn flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
-                      <span className="relative text-sm">Read Full Article</span>
+                      <Twitter className="w-5 h-5" />
+                      <span>Follow Updates</span>
                     </a>
                   </div>
                 </div>
+
+                <div className="mt-6 flex items-center justify-center space-x-2 text-sm text-gray-400">
+                  <Clock className="w-4 h-4" />
+                  <span>Expected launch: Q1 2025</span>
+                </div>
               </div>
             </div>
           </div>
-        </section>
-      )}
 
-      {/* Compact All Posts Grid */}
-      <section id="all-posts" className="py-12 bg-gradient-to-b from-black to-gray-950 relative">
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-4">
-              <BookOpen className="w-3 h-3 text-blue-400" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-medium text-xs">
-                All Articles
-              </span>
-            </div>
-            <h2 className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 mb-4">
-              Knowledge Base
-            </h2>
-            <p className="text-sm text-gray-400">
-              {filteredPosts.length} article{filteredPosts.length !== 1 ? "s" : ""}
-              {selectedTag !== "all" && ` in #${selectedTag}`}
-              {searchQuery && ` matching "${searchQuery}"`}
-            </p>
-          </div>
-
-          {filteredPosts.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {regularPosts.map((post) => (
-                <BlogCard key={post.id} post={post} />
+          {/* Fun Animation Section */}
+          <div className="mt-16 relative">
+            <div className="flex justify-center items-center space-x-4 text-6xl">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="animate-bounce text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400"
+                  style={{
+                    animationDelay: `${i * 0.2}s`,
+                    animationDuration: "2s",
+                  }}
+                >
+                  {["🚀", "💻", "✨", "🎯", "🔥"][i]}
+                </div>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="w-12 h-12 mx-auto mb-6 rounded-full bg-gradient-to-br from-gray-800 to-gray-700 flex items-center justify-center">
-                <Search className="w-6 h-6 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-3">No posts found</h3>
-              <p className="text-gray-400 mb-6 text-sm max-w-md mx-auto">
-                Try adjusting your search terms or selecting a different category.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <button
-                  onClick={() => {
-                    setSelectedTag("all")
-                    setSearchQuery("")
-                  }}
-                  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium rounded-xl hover:scale-105 transition-all duration-300 text-sm"
-                >
-                  Show All Posts
-                </button>
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="px-4 py-2 border border-gray-600 text-gray-300 hover:text-white hover:border-gray-400 font-medium rounded-xl transition-all duration-300 text-sm"
-                >
-                  Clear Search
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Compact Newsletter Section */}
-      <section className="py-12 bg-gradient-to-br from-gray-950 via-black to-gray-950 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05),transparent_70%)]"></div>
-
-        <div className="max-w-3xl mx-auto px-6 text-center relative z-10">
-          <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 relative overflow-hidden group hover:border-gray-600/50 transition-all duration-500">
-            <div className="relative z-10">
-              <div className="inline-flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-4">
-                <div className="w-1.5 h-1.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-medium text-xs">
-                  Stay Updated
-                </span>
-              </div>
-
-              <h2 className="text-xl md:text-2xl font-black mb-4">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300">
-                  Never Miss
-                </span>{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-                  An Update
-                </span>
-              </h2>
-
-              <p className="text-gray-400 mb-6 max-w-xl mx-auto leading-relaxed text-sm">
-                Get the latest tech insights and tutorials delivered to your inbox.
-                <span className="block mt-1 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 text-xs">
-                  Join 10,000+ developers already subscribed.
-                </span>
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto mb-4">
-                <div className="relative flex-1 group/input">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    className="w-full bg-gradient-to-r from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 text-white px-3 py-2 rounded-xl focus:outline-none focus:border-blue-500/50 focus:bg-gray-900/70 transition-all duration-300 placeholder-gray-400 text-sm"
-                  />
-                </div>
-                <button className="group/btn relative px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25">
-                  <span className="relative text-sm">Subscribe</span>
-                </button>
-              </div>
-
-              <p className="text-gray-500 text-xs">No spam, unsubscribe at any time.</p>
-            </div>
+            <p className="text-center text-gray-400 mt-4 text-sm">Something amazing is cooking...</p>
           </div>
         </div>
       </section>
 
       <Footer />
+
+      {/* Custom Styles */}
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        
+        @keyframes gradient-x {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-float {
+          animation: float 8s ease-in-out infinite;
+        }
+        
+        .animate-gradient-x {
+          background-size: 200% 200%;
+          animation: gradient-x 3s ease infinite;
+        }
+        
+        .animate-shimmer {
+          animation: shimmer 2s infinite;
+        }
+        
+        .animate-fade-in-up {
+          animation: fade-in-up 0.6s ease-out forwards;
+          opacity: 0;
+        }
+      `}</style>
     </div>
   )
 }
