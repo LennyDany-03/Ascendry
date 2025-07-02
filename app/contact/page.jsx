@@ -5,6 +5,9 @@ import Navbar from "../../components/navbar.jsx"
 import Footer from "../../components/footer.jsx"
 import InteractiveBackground from "../../components/interactive-background"
 import Link from "next/link"
+import Image from "next/image.js"
+
+import Lenny from "../../assets/Lenny.jpg"
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -254,9 +257,11 @@ const ContactPage = () => {
               <div className="group relative">
                 <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-300 blur-lg"></div>
                 <div className="relative bg-gray-900 rounded-3xl p-3 group-hover:scale-105 transition-transform duration-300">
-                  <img
-                    src="/placeholder.svg?height=500&width=400"
+                  <Image
+                    src={Lenny}
                     alt="Lenny Dany D - CEO of Ascendry"
+                    width={500}
+                    height={500}
                     className="w-full h-[500px] object-cover rounded-2xl"
                   />
                 </div>

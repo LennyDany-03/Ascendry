@@ -90,8 +90,21 @@ const ProjectCard = ({ project }) => {
           )}
         </div>
 
-        {/* Placeholder Image */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        {/* Project Image */}
+        {thumbnail ? (
+          <img
+            src={thumbnail || "/placeholder.svg"}
+            alt={title || "Project"}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            onError={(e) => {
+              e.target.style.display = "none"
+              e.target.nextElementSibling.style.display = "flex"
+            }}
+          />
+        ) : null}
+
+        {/* Fallback Placeholder */}
+        <div className={`absolute inset-0 flex items-center justify-center ${thumbnail ? "hidden" : ""}`}>
           <div className="text-4xl opacity-40 group-hover:opacity-60 transition-opacity duration-300">💻</div>
         </div>
       </div>

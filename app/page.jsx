@@ -1,8 +1,10 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Navbar from "../components/navbar.jsx"
 import Footer from "../components/footer.jsx"
 import InteractiveBackground from "../components/interactive-background"
+import { projectsAPI } from "../lib/supabaseClient.js"
 import Link from "next/link"
 import {
   Globe,
@@ -22,9 +24,53 @@ import {
   Rocket,
   Brain,
   Shield,
+  Loader2,
 } from "lucide-react"
 
 const Page = () => {
+  const [featuredProjects, setFeaturedProjects] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoading(true)
+        const projects = await projectsAPI.getPublished()
+        // Get only the first 3 projects for featured section
+        setFeaturedProjects(projects.slice(0, 3))
+      } catch (err) {
+        console.error("Error fetching projects:", err)
+        setError(err.message)
+        // Fallback to hardcoded data if fetch fails
+        setFeaturedProjects([
+          {
+            title: "NovaPay",
+            description: "AI-powered UPI expense tracker with smart categorization and budget insights",
+            tech_stack: ["React", "Supabase", "AI/ML", "Chart.js"],
+            gradient: "from-blue-500 to-purple-500",
+          },
+          {
+            title: "ClubSphere",
+            description: "Comprehensive college club management system with event handling",
+            tech_stack: ["Next.js", "Firebase", "Stripe", "Analytics"],
+            gradient: "from-purple-500 to-pink-500",
+          },
+          {
+            title: "Exodus Ministry",
+            description: "Modern church website with donation integration and media gallery",
+            tech_stack: ["React", "CMS", "Payment", "Media"],
+            gradient: "from-green-500 to-blue-500",
+          },
+        ])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProjects()
+  }, [])
+
   const services = [
     {
       title: "Web Development",
@@ -76,27 +122,6 @@ const Page = () => {
     },
   ]
 
-  const featuredProjects = [
-    {
-      title: "NovaPay",
-      desc: "AI-powered UPI expense tracker with smart categorization and budget insights",
-      tech: ["React", "Supabase", "AI/ML", "Chart.js"],
-      gradient: "from-blue-500 to-purple-500",
-    },
-    {
-      title: "ClubSphere",
-      desc: "Comprehensive college club management system with event handling",
-      tech: ["Next.js", "Firebase", "Stripe", "Analytics"],
-      gradient: "from-purple-500 to-pink-500",
-    },
-    {
-      title: "Exodus Ministry",
-      desc: "Modern church website with donation integration and media gallery",
-      tech: ["React", "CMS", "Payment", "Media"],
-      gradient: "from-green-500 to-blue-500",
-    },
-  ]
-
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       {/* Interactive Background Component */}
@@ -110,7 +135,7 @@ const Page = () => {
         <div className="max-w-7xl mx-auto px-6 text-center">
           <br />
           <br />
-          <br />  
+          <br />
           <br />
           {/* Main Typography - Enhanced */}
           <div className="mb-12">
@@ -265,69 +290,127 @@ const Page = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProjects.map((project, index) => (
-              <div
-                key={index}
-                className="group bg-gray-900/50 backdrop-blur-xl border border-gray-800/50 hover:border-purple-500/50 hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2 rounded-3xl"
-              >
-                {/* Enhanced Project Image */}
-                <div
-                  className={`h-48 bg-gradient-to-br ${project.gradient} opacity-20 group-hover:opacity-30 transition-all duration-300 relative overflow-hidden`}
-                >
-                  <div className="absolute inset-0 bg-black/40"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-6xl opacity-60 group-hover:opacity-80 transition-opacity duration-300">💻</div>
-                  </div>
-                  <div className="absolute top-4 right-4">
-                    <TrendingUp className="w-6 h-6 text-white opacity-60" />
-                  </div>
-                  <div className="absolute bottom-4 left-4">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-white rounded-full opacity-60"></div>
-                      <div className="w-2 h-2 bg-blue-400 rounded-full opacity-80"></div>
-                      <div className="w-2 h-2 bg-purple-400 rounded-full opacity-60"></div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Enhanced Content */}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-3 text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">
-                    {project.title}
-                  </h3>
-                  <p className="text-gray-400 mb-4 group-hover:text-gray-200 transition-colors duration-300 leading-relaxed">
-                    {project.desc}
-                  </p>
-
-                  {/* Tech Stack */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {project.tech.map((tech, techIndex) => (
-                      <span
-                        key={techIndex}
-                        className="px-3 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded-full group-hover:border-gray-600/50 group-hover:text-white transition-all duration-300"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Enhanced CTA */}
-                  <div className="flex items-center justify-between">
-                    <button className="text-white hover:text-purple-400 font-semibold transition-colors duration-300 flex items-center space-x-2 group/btn">
-                      <span>View Details</span>
-                      <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
-                    </button>
-                    <div className="flex space-x-1">
-                      <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse"></div>
-                      <div className="w-1.5 h-1.5 bg-pink-500 rounded-full animate-pulse delay-100"></div>
-                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse delay-200"></div>
-                    </div>
-                  </div>
-                </div>
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center py-20">
+              <div className="flex items-center space-x-3">
+                <Loader2 className="w-6 h-6 text-purple-400 animate-spin" />
+                <span className="text-gray-400">Loading projects...</span>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div className="text-center py-20">
+              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 max-w-md mx-auto">
+                <p className="text-red-400 mb-4">Failed to load projects</p>
+                <p className="text-gray-400 text-sm">Showing fallback content</p>
+              </div>
+            </div>
+          )}
+
+          {/* Projects Grid */}
+          {!loading && featuredProjects.length > 0 && (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredProjects.map((project, index) => (
+                <div
+                  key={project.id || index}
+                  className="group bg-gray-900/50 backdrop-blur-xl border border-gray-800/50 hover:border-purple-500/50 hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-2 rounded-3xl"
+                >
+                  {/* Enhanced Project Image */}
+                  <div className="relative h-48 overflow-hidden">
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br ${project.gradient || "from-blue-500 to-purple-500"} opacity-20 group-hover:opacity-30 transition-all duration-300`}
+                    ></div>
+                    <div className="absolute inset-0 bg-black/40"></div>
+
+                    {/* Project Image */}
+                    {project.thumbnail ? (
+                      <img
+                        src={project.thumbnail || "/placeholder.svg"}
+                        alt={project.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        onError={(e) => {
+                          e.target.style.display = "none"
+                          e.target.nextElementSibling.style.display = "flex"
+                        }}
+                      />
+                    ) : null}
+
+                    {/* Fallback */}
+                    <div
+                      className={`absolute inset-0 flex items-center justify-center ${project.thumbnail ? "hidden" : ""}`}
+                    >
+                      <div className="text-6xl opacity-60 group-hover:opacity-80 transition-opacity duration-300">
+                        💻
+                      </div>
+                    </div>
+
+                    <div className="absolute top-4 right-4">
+                      <TrendingUp className="w-6 h-6 text-white opacity-60" />
+                    </div>
+                    <div className="absolute bottom-4 left-4">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-white rounded-full opacity-60"></div>
+                        <div className="w-2 h-2 bg-blue-400 rounded-full opacity-80"></div>
+                        <div className="w-2 h-2 bg-purple-400 rounded-full opacity-60"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Enhanced Content */}
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold mb-3 text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">
+                      {project.title}
+                    </h3>
+                    <p className="text-gray-400 mb-4 group-hover:text-gray-200 transition-colors duration-300 leading-relaxed">
+                      {project.description}
+                    </p>
+
+                    {/* Tech Stack */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {(project.tech_stack || project.techStack || []).slice(0, 4).map((tech, techIndex) => (
+                        <span
+                          key={techIndex}
+                          className="px-3 py-1 bg-gray-800/50 border border-gray-700/50 text-gray-300 text-xs rounded-full group-hover:border-gray-600/50 group-hover:text-white transition-all duration-300"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Enhanced CTA */}
+                    <div className="flex items-center justify-between">
+                      <Link
+                        href={project.slug ? `/projects/${project.slug}` : "#"}
+                        className="text-white hover:text-purple-400 font-semibold transition-colors duration-300 flex items-center space-x-2 group/btn"
+                      >
+                        <span>View Details</span>
+                        <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                      </Link>
+                      <div className="flex space-x-1">
+                        <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse"></div>
+                        <div className="w-1.5 h-1.5 bg-pink-500 rounded-full animate-pulse delay-100"></div>
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse delay-200"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* No Projects State */}
+          {!loading && featuredProjects.length === 0 && !error && (
+            <div className="text-center py-20">
+              <div className="bg-gray-900/50 border border-gray-700/50 rounded-xl p-8 max-w-md mx-auto">
+                <Code className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-400 mb-2">No projects found</p>
+                <p className="text-gray-500 text-sm">Check back later for updates</p>
+              </div>
+            </div>
+          )}
 
           <div className="text-center mt-12">
             <Link
