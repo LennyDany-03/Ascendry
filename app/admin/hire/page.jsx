@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase, hireMeAPI } from "../../../lib/supabaseClient"
+import { supabase } from "../../../lib/supabase/client"
+import { hireMeAPI } from "../../../lib/api"
 import Navbar from "../../../components/navbar.jsx"
 import Footer from "../../../components/footer.jsx"
 import InteractiveBackground from "../../../components/interactive-background"
@@ -108,7 +109,8 @@ const AdminHirePage = () => {
 
   const loadHireRequests = async () => {
     try {
-      const data = await hireMeAPI.getAll()
+      const api = hireMeAPI(supabase)
+      const data = await api.getAll()
       setHireRequests(data)
     } catch (error) {
       console.error("Error loading hire requests:", error)
@@ -117,7 +119,8 @@ const AdminHirePage = () => {
 
   const loadStats = async () => {
     try {
-      const statsData = await hireMeAPI.getStats()
+      const api = hireMeAPI(supabase)
+      const statsData = await api.getStats()
       setStats(statsData)
     } catch (error) {
       console.error("Error loading stats:", error)
@@ -130,7 +133,8 @@ const AdminHirePage = () => {
     setLoadingFiles((prev) => ({ ...prev, [filePath]: true }))
 
     try {
-      const url = await hireMeAPI.getFileUrl(filePath)
+      const api = hireMeAPI(supabase)
+      const url = await api.getFileUrl(filePath)
       setFileUrls((prev) => ({ ...prev, [filePath]: url }))
       return url
     } catch (error) {
@@ -144,14 +148,15 @@ const AdminHirePage = () => {
   const handleStatusUpdate = async (id, newStatus) => {
     setUpdating(true)
     try {
-      await hireMeAPI.update(id, {
+      const api = hireMeAPI(supabase)
+      await api.update(id, {
         status: newStatus,
         responded_at: newStatus !== "new" ? new Date().toISOString() : null,
       })
       await loadHireRequests()
       await loadStats()
       if (selectedRequest?.id === id) {
-        const updatedRequest = await hireMeAPI.getById(id)
+        const updatedRequest = await api.getById(id)
         setSelectedRequest(updatedRequest)
       }
       toast.success("Status updated successfully")
@@ -166,11 +171,12 @@ const AdminHirePage = () => {
   const handlePriorityUpdate = async (id, newPriority) => {
     setUpdating(true)
     try {
-      await hireMeAPI.update(id, { priority: newPriority })
+      const api = hireMeAPI(supabase)
+      await api.update(id, { priority: newPriority })
       await loadHireRequests()
       await loadStats()
       if (selectedRequest?.id === id) {
-        const updatedRequest = await hireMeAPI.getById(id)
+        const updatedRequest = await api.getById(id)
         setSelectedRequest(updatedRequest)
       }
       toast.success("Priority updated successfully")
@@ -185,10 +191,11 @@ const AdminHirePage = () => {
   const handleNotesUpdate = async (id, notes) => {
     setUpdating(true)
     try {
-      await hireMeAPI.update(id, { admin_notes: notes })
+      const api = hireMeAPI(supabase)
+      await api.update(id, { admin_notes: notes })
       await loadHireRequests()
       if (selectedRequest?.id === id) {
-        const updatedRequest = await hireMeAPI.getById(id)
+        const updatedRequest = await api.getById(id)
         setSelectedRequest(updatedRequest)
       }
       toast.success("Notes updated successfully")
@@ -203,7 +210,8 @@ const AdminHirePage = () => {
   const handleDelete = async (id) => {
     if (confirm("Are you sure you want to delete this hire request? This will also delete all associated files.")) {
       try {
-        await hireMeAPI.delete(id)
+        const api = hireMeAPI(supabase)
+        await api.delete(id)
         await loadHireRequests()
         await loadStats()
         setShowModal(false)
@@ -219,8 +227,9 @@ const AdminHirePage = () => {
   const handleFileDelete = async (requestId, filePath) => {
     if (confirm("Are you sure you want to delete this file?")) {
       try {
-        await hireMeAPI.deleteFile(requestId, filePath)
-        const updatedRequest = await hireMeAPI.getById(requestId)
+        const api = hireMeAPI(supabase)
+        await api.deleteFile(requestId, filePath)
+        const updatedRequest = await api.getById(requestId)
         setSelectedRequest(updatedRequest)
         await loadHireRequests()
 

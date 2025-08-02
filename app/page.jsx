@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import Navbar from "../components/navbar.jsx"
 import Footer from "../components/footer.jsx"
 import InteractiveBackground from "../components/interactive-background"
-import { projectsAPI } from "../lib/supabaseClient.js"
+import { supabase } from "../lib/supabase/client.js"
+import { projectsAPI } from "../lib/api.js"
 import Link from "next/link"
 import {
   Globe,
@@ -36,7 +37,8 @@ const Page = () => {
     const fetchProjects = async () => {
       try {
         setLoading(true)
-        const projects = await projectsAPI.getPublished()
+        const api = projectsAPI(supabase)
+        const projects = await api.getPublished()
         // Get only the first 3 projects for featured section
         setFeaturedProjects(projects.slice(0, 3))
       } catch (err) {

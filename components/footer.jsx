@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase } from "../lib/supabaseClient"
+import { supabase } from "../lib/supabase/client"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
@@ -435,13 +435,13 @@ const Footer = () => {
                     <span className="text-green-400 text-xs font-medium">Admin</span>
                   </div>
 
-                  <Link
+                  <a
                     href="/admin/dashboard"
                     className="group bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 flex items-center space-x-2 border border-blue-500/30"
                   >
                     <BarChart3 className="w-4 h-4" />
                     <span>Dashboard</span>
-                  </Link>
+                  </a>
 
                   <button
                     onClick={handleSignOut}

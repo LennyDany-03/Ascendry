@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase } from "../../../lib/supabaseClient"
+import { supabase } from "../../../lib/supabase/client"
 import Navbar from "../../../components/navbar.jsx"
 import Footer from "../../../components/footer.jsx"
 import InteractiveBackground from "../../../components/interactive-background"
@@ -38,6 +38,7 @@ import {
   Briefcase,
   Heart,
 } from "lucide-react"
+import { v4 as uuidv4 } from "uuid"
 
 const AdminStorePage = () => {
   const [user, setUser] = useState(null)
@@ -68,9 +69,17 @@ const AdminStorePage = () => {
     demoUrl: "",
     documentationUrl: "",
   })
+
+  // Image file state for local storage and preview
+  const [imageFile, setImageFile] = useState(null)
+
+  // Preview URL state
+  const [previewUrl, setPreviewUrl] = useState(null)
+
   const [techInput, setTechInput] = useState("")
   const [featureInput, setFeatureInput] = useState("")
   const [uploading, setUploading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, productId: null, productTitle: "" })
   const router = useRouter()
   const toast = useToast()
@@ -148,6 +157,53 @@ const AdminStorePage = () => {
     }
   }
 
+  // Extract file path from Supabase Storage public URL
+  const extractFilePathFromUrl = (url) => {
+    if (!url) return null
+
+    try {
+      // Extract the file path from the public URL
+      // URL format: https://[project-ref].supabase.co/storage/v1/object/public/product-images/filename.ext
+      const urlParts = url.split("/storage/v1/object/public/product-images/")
+      if (urlParts.length > 1) {
+        return urlParts[1]
+      }
+      return null
+    } catch (error) {
+      console.error("Error extracting file path from URL:", error)
+      return null
+    }
+  }
+
+  // Delete images from Supabase Storage
+  const deleteImagesFromStorage = async (product) => {
+    const imagesToDelete = []
+
+    // Collect thumbnail image URL from the product
+    if (product.thumbnail) {
+      const filePath = extractFilePathFromUrl(product.thumbnail)
+      if (filePath) imagesToDelete.push(filePath)
+    }
+
+    // Delete images from storage if any exist
+    if (imagesToDelete.length > 0) {
+      try {
+        const { error } = await supabase.storage.from("product-images").remove(imagesToDelete)
+
+        if (error) {
+          console.error("Error deleting images from storage:", error)
+          // Don't throw error here - we still want to delete the product record
+          // Just log the error and continue
+        } else {
+          console.log(`Successfully deleted ${imagesToDelete.length} images from storage`)
+        }
+      } catch (error) {
+        console.error("Error deleting images from storage:", error)
+        // Continue with product deletion even if image deletion fails
+      }
+    }
+  }
+
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -193,15 +249,43 @@ const AdminStorePage = () => {
     }))
   }
 
-  // Handle image upload
-  const handleImageUpload = async (file, fieldName) => {
+  // Handle image selection (store in local state and create preview)
+  const handleImageChange = (file) => {
     if (!file) return
 
-    setUploading(true)
+    // Store the file in local state
+    setImageFile(file)
+
+    // Create preview URL
+    const previewUrl = URL.createObjectURL(file)
+    setPreviewUrl(previewUrl)
+  }
+
+  // Remove image from local state and preview
+  const removeImage = () => {
+    // Revoke the object URL to free memory
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
+    }
+
+    setImageFile(null)
+    setPreviewUrl(null)
+
+    // Also clear the form data URL if it exists
+    setFormData((prev) => ({
+      ...prev,
+      thumbnail: "",
+    }))
+  }
+
+  // Upload image to Supabase Storage and return public URL
+  const uploadImageToStorage = async (file, folder = "products") => {
+    if (!file) return null
+
     try {
       const fileExt = file.name.split(".").pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-      const filePath = `products/${fileName}`
+      const fileName = `${uuidv4()}.${fileExt}`
+      const filePath = `${folder}/${fileName}`
 
       const { error: uploadError } = await supabase.storage.from("product-images").upload(filePath, file, {
         cacheControl: "3600",
@@ -214,13 +298,10 @@ const AdminStorePage = () => {
         data: { publicUrl },
       } = supabase.storage.from("product-images").getPublicUrl(filePath)
 
-      setFormData((prev) => ({ ...prev, [fieldName]: publicUrl }))
-      toast.success("Image uploaded successfully!")
+      return publicUrl
     } catch (error) {
       console.error("Upload error:", error)
-      toast.error(`Failed to upload image: ${error.message}`)
-    } finally {
-      setUploading(false)
+      throw new Error(`Failed to upload image: ${error.message}`)
     }
   }
 
@@ -237,6 +318,13 @@ const AdminStorePage = () => {
         return
       }
 
+      // Upload image if it exists
+      let imageUrl = formData.thumbnail // Keep existing image URL if editing
+
+      if (imageFile) {
+        imageUrl = await uploadImageToStorage(imageFile)
+      }
+
       const productData = {
         title: formData.title,
         description: formData.description,
@@ -246,7 +334,7 @@ const AdminStorePage = () => {
         category: formData.category,
         is_popular: formData.isPopular,
         is_free: formData.isFree,
-        thumbnail: formData.thumbnail || null,
+        thumbnail: imageUrl || null,
         gradient: formData.gradient,
         icon: formData.icon,
         features: formData.features,
@@ -289,8 +377,13 @@ const AdminStorePage = () => {
     }
   }
 
-  // Reset form
+  // Reset form and clear all states
   const resetForm = () => {
+    // Revoke object URL to free memory
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
+    }
+
     setFormData({
       title: "",
       description: "",
@@ -311,6 +404,9 @@ const AdminStorePage = () => {
       demoUrl: "",
       documentationUrl: "",
     })
+
+    setImageFile(null)
+    setPreviewUrl(null)
     setTechInput("")
     setFeatureInput("")
   }
@@ -338,6 +434,11 @@ const AdminStorePage = () => {
       demoUrl: product.demo_url || "",
       documentationUrl: product.documentation_url || "",
     })
+
+    // Clear any existing file states and previews when editing
+    setImageFile(null)
+    setPreviewUrl(null)
+
     setShowForm(true)
   }
 
@@ -350,18 +451,37 @@ const AdminStorePage = () => {
     })
   }
 
-  // Handle delete
+  // Handle delete with image cleanup
   const handleDelete = async () => {
+    setDeleting(true)
+
     try {
+      // First, get the product data to access image URLs
+      const productToDelete = products.find((p) => p.id === confirmModal.productId)
+
+      if (!productToDelete) {
+        throw new Error("Product not found")
+      }
+
+      // Delete associated images from storage first
+      await deleteImagesFromStorage(productToDelete)
+
+      // Then delete the product record from database
       const { error } = await supabase.from("products").delete().eq("id", confirmModal.productId)
 
       if (error) throw error
 
+      // Reload products and show success message
       await loadProducts()
-      toast.success("Product deleted successfully!")
+      toast.success("Product and associated images deleted successfully!")
+
+      // Close the confirmation modal
+      setConfirmModal({ isOpen: false, productId: null, productTitle: "" })
     } catch (error) {
       console.error("Delete error:", error)
-      toast.error("Failed to delete product")
+      toast.error(`Failed to delete product: ${error.message}`)
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -429,6 +549,55 @@ const AdminStorePage = () => {
       Briefcase,
     }
     return icons[iconName] || Code
+  }
+
+  // Image upload component
+  const ImageUploadField = ({ label, currentUrl }) => {
+    const hasPreview = previewUrl
+    const hasExistingImage = currentUrl && !hasPreview
+    const displayUrl = hasPreview ? previewUrl : hasExistingImage ? currentUrl : null
+
+    return (
+      <div>
+        <label className="block text-gray-300 font-medium mb-2">{label}</label>
+        <div className="border-2 border-dashed border-gray-700/50 rounded-xl p-6 text-center hover:border-gray-600/50 transition-colors duration-300">
+          {displayUrl ? (
+            <div className="space-y-4">
+              <img
+                src={displayUrl || "/placeholder.svg"}
+                alt={`${label} preview`}
+                className="w-full h-48 object-cover rounded-lg"
+              />
+              <button
+                type="button"
+                onClick={removeImage}
+                className="text-red-400 hover:text-red-300 transition-colors duration-300"
+              >
+                Remove Image
+              </button>
+            </div>
+          ) : (
+            <div>
+              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-400 mb-4">Upload product thumbnail</p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleImageChange(e.target.files[0])}
+                className="hidden"
+                id="thumbnail-upload"
+              />
+              <label
+                htmlFor="thumbnail-upload"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer transition-colors duration-300"
+              >
+                Choose File
+              </label>
+            </div>
+          )}
+        </div>
+      </div>
+    )
   }
 
   if (loading) {
@@ -595,7 +764,8 @@ const AdminStorePage = () => {
                           </button>
                           <button
                             onClick={() => handleDeleteClick(product)}
-                            className="w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center justify-center transition-colors duration-300"
+                            disabled={deleting}
+                            className="w-8 h-8 bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg flex items-center justify-center transition-colors duration-300"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -1065,45 +1235,7 @@ const AdminStorePage = () => {
                     <span>Product Images</span>
                   </h3>
 
-                  <div>
-                    <label className="block text-gray-300 font-medium mb-2">Product Thumbnail</label>
-                    <div className="border-2 border-dashed border-gray-700/50 rounded-xl p-6 text-center hover:border-gray-600/50 transition-colors duration-300">
-                      {formData.thumbnail ? (
-                        <div className="space-y-4">
-                          <img
-                            src={formData.thumbnail || "/placeholder.svg"}
-                            alt="Thumbnail preview"
-                            className="w-full h-48 object-cover rounded-lg"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setFormData((prev) => ({ ...prev, thumbnail: "" }))}
-                            className="text-red-400 hover:text-red-300 transition-colors duration-300"
-                          >
-                            Remove Image
-                          </button>
-                        </div>
-                      ) : (
-                        <div>
-                          <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-400 mb-4">Upload product thumbnail</p>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleImageUpload(e.target.files[0], "thumbnail")}
-                            className="hidden"
-                            id="thumbnail-upload"
-                          />
-                          <label
-                            htmlFor="thumbnail-upload"
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer transition-colors duration-300"
-                          >
-                            Choose File
-                          </label>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  <ImageUploadField label="Product Thumbnail" currentUrl={formData.thumbnail} />
                 </div>
 
                 {/* Form Actions */}
@@ -1161,9 +1293,10 @@ const AdminStorePage = () => {
         onClose={() => setConfirmModal({ isOpen: false, productId: null, productTitle: "" })}
         onConfirm={handleDelete}
         title="Delete Product"
-        message={`Are you sure you want to delete "${confirmModal.productTitle}"? This action cannot be undone.`}
-        confirmText="Delete Product"
+        message={`Are you sure you want to delete "${confirmModal.productTitle}"? This action will permanently delete the product and all associated images.`}
+        confirmText={deleting ? "Deleting..." : "Delete Product"}
         type="danger"
+        loading={deleting}
       />
 
       <Footer />

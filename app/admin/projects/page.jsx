@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase } from "../../../lib/supabaseClient"
+import { supabase } from "../../../lib/supabase/client"
 import Navbar from "../../../components/navbar.jsx"
 import Footer from "../../../components/footer.jsx"
 import InteractiveBackground from "../../../components/interactive-background"
@@ -33,6 +33,7 @@ import {
 } from "lucide-react"
 import ConfirmationModal from "../../../components/confirmation-modal"
 import { useToast } from "../../../components/toast"
+import { v4 as uuidv4 } from "uuid"
 
 const AdminProjectsPage = () => {
   const [user, setUser] = useState(null)
@@ -65,9 +66,25 @@ const AdminProjectsPage = () => {
     caseStudyImage1: "",
     caseStudyImage2: "",
   })
+
+  // Image file states for local storage and preview
+  const [imageFiles, setImageFiles] = useState({
+    thumbnail: null,
+    caseStudyImage1: null,
+    caseStudyImage2: null,
+  })
+
+  // Preview URL states
+  const [previewUrls, setPreviewUrls] = useState({
+    thumbnail: null,
+    caseStudyImage1: null,
+    caseStudyImage2: null,
+  })
+
   const [techInput, setTechInput] = useState("")
   const [featureInput, setFeatureInput] = useState("")
   const [uploading, setUploading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const toast = useToast()
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, projectId: null, projectTitle: "" })
   const router = useRouter()
@@ -145,6 +162,63 @@ const AdminProjectsPage = () => {
     }
   }
 
+  // Extract file path from Supabase Storage public URL
+  const extractFilePathFromUrl = (url) => {
+    if (!url) return null
+
+    try {
+      // Extract the file path from the public URL
+      // URL format: https://[project-ref].supabase.co/storage/v1/object/public/project-images/projects/filename.ext
+      const urlParts = url.split("/storage/v1/object/public/project-images/")
+      if (urlParts.length > 1) {
+        return urlParts[1]
+      }
+      return null
+    } catch (error) {
+      console.error("Error extracting file path from URL:", error)
+      return null
+    }
+  }
+
+  // Delete images from Supabase Storage
+  const deleteImagesFromStorage = async (project) => {
+    const imagesToDelete = []
+
+    // Collect all image URLs from the project
+    if (project.thumbnail) {
+      const filePath = extractFilePathFromUrl(project.thumbnail)
+      if (filePath) imagesToDelete.push(filePath)
+    }
+
+    if (project.case_study_image1) {
+      const filePath = extractFilePathFromUrl(project.case_study_image1)
+      if (filePath) imagesToDelete.push(filePath)
+    }
+
+    if (project.case_study_image2) {
+      const filePath = extractFilePathFromUrl(project.case_study_image2)
+      if (filePath) imagesToDelete.push(filePath)
+    }
+
+    // Delete images from storage if any exist
+    if (imagesToDelete.length > 0) {
+      try {
+        const { error } = await supabase.storage.from("project-images").remove(imagesToDelete)
+
+        if (error) {
+          console.error("Error deleting images from storage:", error)
+          // Don't throw error here - we still want to delete the project record
+          // Just log the error and continue
+        } else {
+          console.log(`Successfully deleted ${imagesToDelete.length} images from storage`)
+        }
+      } catch (error) {
+        console.error("Error deleting images from storage:", error)
+        // Continue with project deletion even if image deletion fails
+      }
+    }
+  }
+
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -195,15 +269,56 @@ const AdminProjectsPage = () => {
     }))
   }
 
-  // Handle image upload with better error handling and loading states
-  const handleImageUpload = async (file, fieldName) => {
+  // Handle image selection (store in local state and create preview)
+  const handleImageChange = (fieldName, file) => {
     if (!file) return
 
-    setUploading(true)
+    // Store the file in local state
+    setImageFiles((prev) => ({
+      ...prev,
+      [fieldName]: file,
+    }))
+
+    // Create preview URL
+    const previewUrl = URL.createObjectURL(file)
+    setPreviewUrls((prev) => ({
+      ...prev,
+      [fieldName]: previewUrl,
+    }))
+  }
+
+  // Remove image from local state and preview
+  const removeImage = (fieldName) => {
+    // Revoke the object URL to free memory
+    if (previewUrls[fieldName]) {
+      URL.revokeObjectURL(previewUrls[fieldName])
+    }
+
+    setImageFiles((prev) => ({
+      ...prev,
+      [fieldName]: null,
+    }))
+
+    setPreviewUrls((prev) => ({
+      ...prev,
+      [fieldName]: null,
+    }))
+
+    // Also clear the form data URL if it exists
+    setFormData((prev) => ({
+      ...prev,
+      [fieldName]: "",
+    }))
+  }
+
+  // Upload image to Supabase Storage and return public URL
+  const uploadImageToStorage = async (file, folder = "projects") => {
+    if (!file) return null
+
     try {
       const fileExt = file.name.split(".").pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-      const filePath = `projects/${fileName}`
+      const fileName = `${uuidv4()}.${fileExt}`
+      const filePath = `${folder}/${fileName}`
 
       const { error: uploadError } = await supabase.storage.from("project-images").upload(filePath, file, {
         cacheControl: "3600",
@@ -216,13 +331,10 @@ const AdminProjectsPage = () => {
         data: { publicUrl },
       } = supabase.storage.from("project-images").getPublicUrl(filePath)
 
-      setFormData((prev) => ({ ...prev, [fieldName]: publicUrl }))
-      toast.success("Image uploaded successfully!")
+      return publicUrl
     } catch (error) {
       console.error("Upload error:", error)
-      toast.error(`Failed to upload image: ${error.message}`)
-    } finally {
-      setUploading(false)
+      throw new Error(`Failed to upload image: ${error.message}`)
     }
   }
 
@@ -239,6 +351,16 @@ const AdminProjectsPage = () => {
         return
       }
 
+      // Upload images if they exist
+      const imageUrls = {}
+
+      for (const [fieldName, file] of Object.entries(imageFiles)) {
+        if (file) {
+          const uploadedUrl = await uploadImageToStorage(file)
+          imageUrls[fieldName] = uploadedUrl
+        }
+      }
+
       const projectData = {
         title: formData.title,
         subtitle: formData.subtitle || null,
@@ -251,15 +373,15 @@ const AdminProjectsPage = () => {
         status: formData.status,
         duration: formData.duration || null,
         year: formData.year,
-        thumbnail: formData.thumbnail || null,
+        thumbnail: imageUrls.thumbnail || formData.thumbnail || null,
         gradient: formData.gradient,
         icon: formData.icon,
         features: formData.features,
         metrics: formData.metrics,
         complexity: formData.complexity,
         impact: formData.impact || null,
-        case_study_image1: formData.caseStudyImage1 || null,
-        case_study_image2: formData.caseStudyImage2 || null,
+        case_study_image1: imageUrls.caseStudyImage1 || formData.caseStudyImage1 || null,
+        case_study_image2: imageUrls.caseStudyImage2 || formData.caseStudyImage2 || null,
         created_by: user.id,
         is_published: true,
       }
@@ -293,8 +415,13 @@ const AdminProjectsPage = () => {
     }
   }
 
-  // Reset form
+  // Reset form and clear all states
   const resetForm = () => {
+    // Revoke all object URLs to free memory
+    Object.values(previewUrls).forEach((url) => {
+      if (url) URL.revokeObjectURL(url)
+    })
+
     setFormData({
       title: "",
       subtitle: "",
@@ -317,6 +444,19 @@ const AdminProjectsPage = () => {
       caseStudyImage1: "",
       caseStudyImage2: "",
     })
+
+    setImageFiles({
+      thumbnail: null,
+      caseStudyImage1: null,
+      caseStudyImage2: null,
+    })
+
+    setPreviewUrls({
+      thumbnail: null,
+      caseStudyImage1: null,
+      caseStudyImage2: null,
+    })
+
     setTechInput("")
     setFeatureInput("")
   }
@@ -346,6 +486,20 @@ const AdminProjectsPage = () => {
       caseStudyImage1: project.case_study_image1 || "",
       caseStudyImage2: project.case_study_image2 || "",
     })
+
+    // Clear any existing file states and previews when editing
+    setImageFiles({
+      thumbnail: null,
+      caseStudyImage1: null,
+      caseStudyImage2: null,
+    })
+
+    setPreviewUrls({
+      thumbnail: null,
+      caseStudyImage1: null,
+      caseStudyImage2: null,
+    })
+
     setShowForm(true)
   }
 
@@ -358,18 +512,37 @@ const AdminProjectsPage = () => {
     })
   }
 
-  // Handle delete
+  // Handle delete with image cleanup
   const handleDelete = async () => {
+    setDeleting(true)
+
     try {
+      // First, get the project data to access image URLs
+      const projectToDelete = projects.find((p) => p.id === confirmModal.projectId)
+
+      if (!projectToDelete) {
+        throw new Error("Project not found")
+      }
+
+      // Delete associated images from storage first
+      await deleteImagesFromStorage(projectToDelete)
+
+      // Then delete the project record from database
       const { error } = await supabase.from("projects").delete().eq("id", confirmModal.projectId)
 
       if (error) throw error
 
+      // Reload projects and show success message
       await loadProjects()
-      toast.success("Project deleted successfully!")
+      toast.success("Project and associated images deleted successfully!")
+
+      // Close the confirmation modal
+      setConfirmModal({ isOpen: false, projectId: null, projectTitle: "" })
     } catch (error) {
       console.error("Delete error:", error)
-      toast.error("Failed to delete project")
+      toast.error(`Failed to delete project: ${error.message}`)
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -422,6 +595,54 @@ const AdminProjectsPage = () => {
     "from-pink-500 to-rose-500",
     "from-indigo-500 to-purple-500",
   ]
+
+  // Image upload component
+  const ImageUploadField = ({ fieldName, label, currentUrl }) => {
+    const hasPreview = previewUrls[fieldName]
+    const hasExistingImage = currentUrl && !hasPreview
+    const displayUrl = hasPreview ? previewUrls[fieldName] : hasExistingImage ? currentUrl : null
+
+    return (
+      <div>
+        <label className="block text-gray-300 font-medium mb-2">{label}</label>
+        <div className="border-2 border-dashed border-gray-700/50 rounded-xl p-4 text-center hover:border-gray-600/50 transition-colors duration-300">
+          {displayUrl ? (
+            <div className="space-y-2">
+              <img
+                src={displayUrl || "/placeholder.svg"}
+                alt={`${label} preview`}
+                className="w-full h-32 object-cover rounded-lg"
+              />
+              <button
+                type="button"
+                onClick={() => removeImage(fieldName)}
+                className="text-red-400 hover:text-red-300 text-sm transition-colors duration-300"
+              >
+                Remove
+              </button>
+            </div>
+          ) : (
+            <div>
+              <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleImageChange(fieldName, e.target.files[0])}
+                className="hidden"
+                id={`${fieldName}-upload`}
+              />
+              <label
+                htmlFor={`${fieldName}-upload`}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm cursor-pointer transition-colors duration-300"
+              >
+                Upload
+              </label>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   if (loading) {
     return (
@@ -571,7 +792,8 @@ const AdminProjectsPage = () => {
                         </button>
                         <button
                           onClick={() => handleDeleteClick(project)}
-                          className="w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center justify-center transition-colors duration-300"
+                          disabled={deleting}
+                          className="w-8 h-8 bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg flex items-center justify-center transition-colors duration-300"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -1090,125 +1312,17 @@ const AdminProjectsPage = () => {
                   </h3>
 
                   <div className="grid md:grid-cols-3 gap-6">
-                    {/* Thumbnail */}
-                    <div>
-                      <label className="block text-gray-300 font-medium mb-2">Thumbnail</label>
-                      <div className="border-2 border-dashed border-gray-700/50 rounded-xl p-4 text-center hover:border-gray-600/50 transition-colors duration-300">
-                        {formData.thumbnail ? (
-                          <div className="space-y-2">
-                            <img
-                              src={formData.thumbnail || "/placeholder.svg"}
-                              alt="Thumbnail preview"
-                              className="w-full h-32 object-cover rounded-lg"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setFormData((prev) => ({ ...prev, thumbnail: "" }))}
-                              className="text-red-400 hover:text-red-300 text-sm transition-colors duration-300"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ) : (
-                          <div>
-                            <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => handleImageUpload(e.target.files[0], "thumbnail")}
-                              className="hidden"
-                              id="thumbnail-upload"
-                            />
-                            <label
-                              htmlFor="thumbnail-upload"
-                              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm cursor-pointer transition-colors duration-300"
-                            >
-                              Upload
-                            </label>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Case Study Image 1 */}
-                    <div>
-                      <label className="block text-gray-300 font-medium mb-2">Case Study Image 1</label>
-                      <div className="border-2 border-dashed border-gray-700/50 rounded-xl p-4 text-center hover:border-gray-600/50 transition-colors duration-300">
-                        {formData.caseStudyImage1 ? (
-                          <div className="space-y-2">
-                            <img
-                              src={formData.caseStudyImage1 || "/placeholder.svg"}
-                              alt="Case study preview"
-                              className="w-full h-32 object-cover rounded-lg"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setFormData((prev) => ({ ...prev, caseStudyImage1: "" }))}
-                              className="text-red-400 hover:text-red-300 text-sm transition-colors duration-300"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ) : (
-                          <div>
-                            <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => handleImageUpload(e.target.files[0], "caseStudyImage1")}
-                              className="hidden"
-                              id="case-study-1-upload"
-                            />
-                            <label
-                              htmlFor="case-study-1-upload"
-                              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm cursor-pointer transition-colors duration-300"
-                            >
-                              Upload
-                            </label>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Case Study Image 2 */}
-                    <div>
-                      <label className="block text-gray-300 font-medium mb-2">Case Study Image 2</label>
-                      <div className="border-2 border-dashed border-gray-700/50 rounded-xl p-4 text-center hover:border-gray-600/50 transition-colors duration-300">
-                        {formData.caseStudyImage2 ? (
-                          <div className="space-y-2">
-                            <img
-                              src={formData.caseStudyImage2 || "/placeholder.svg"}
-                              alt="Case study preview"
-                              className="w-full h-32 object-cover rounded-lg"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setFormData((prev) => ({ ...prev, caseStudyImage2: "" }))}
-                              className="text-red-400 hover:text-red-300 text-sm transition-colors duration-300"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ) : (
-                          <div>
-                            <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => handleImageUpload(e.target.files[0], "caseStudyImage2")}
-                              className="hidden"
-                              id="case-study-2-upload"
-                            />
-                            <label
-                              htmlFor="case-study-2-upload"
-                              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm cursor-pointer transition-colors duration-300"
-                            >
-                              Upload
-                            </label>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <ImageUploadField fieldName="thumbnail" label="Thumbnail" currentUrl={formData.thumbnail} />
+                    <ImageUploadField
+                      fieldName="caseStudyImage1"
+                      label="Case Study Image 1"
+                      currentUrl={formData.caseStudyImage1}
+                    />
+                    <ImageUploadField
+                      fieldName="caseStudyImage2"
+                      label="Case Study Image 2"
+                      currentUrl={formData.caseStudyImage2}
+                    />
                   </div>
                 </div>
 
@@ -1267,9 +1381,10 @@ const AdminProjectsPage = () => {
         onClose={() => setConfirmModal({ isOpen: false, projectId: null, projectTitle: "" })}
         onConfirm={handleDelete}
         title="Delete Project"
-        message={`Are you sure you want to delete "${confirmModal.projectTitle}"? This action cannot be undone.`}
-        confirmText="Delete Project"
+        message={`Are you sure you want to delete "${confirmModal.projectTitle}"? This action will permanently delete the project and all associated images.`}
+        confirmText={deleting ? "Deleting..." : "Delete Project"}
         type="danger"
+        loading={deleting}
       />
 
       <Footer />

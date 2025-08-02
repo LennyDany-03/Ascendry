@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase, hireMeAPI } from "../../../lib/supabaseClient"
+import { supabase } from "../../../lib/supabase/client"
+import { hireMeAPI } from "../../../lib/api"
 import Navbar from "../../../components/navbar.jsx"
 import Footer from "../../../components/footer.jsx"
 import InteractiveBackground from "../../../components/interactive-background"
@@ -77,11 +78,12 @@ const AdminDashboard = () => {
   const loadDashboardData = async () => {
     try {
       // Load hire request stats
-      const hireStats = await hireMeAPI.getStats()
+      const api = hireMeAPI(supabase)
+      const hireStats = await api.getStats()
       setStats(hireStats)
 
       // Load recent hire requests
-      const allRequests = await hireMeAPI.getAll()
+      const allRequests = await api.getAll()
       setRecentHireRequests(allRequests.slice(0, 5))
     } catch (error) {
       console.error("Error loading dashboard data:", error)

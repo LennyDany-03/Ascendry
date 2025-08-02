@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase } from "../../../../lib/supabaseClient"
+import { supabase } from "../../../../lib/supabase/client"
 import { useRouter } from "next/navigation"
 
 export default function AuthCallback() {
@@ -36,7 +36,7 @@ export default function AuthCallback() {
           .select("*")
           .eq("email", user.email)
           .eq("is_active", true)
-          .single()
+          .maybeSingle()
 
         if (adminError || !adminData) {
           console.error("Admin access denied:", adminError)

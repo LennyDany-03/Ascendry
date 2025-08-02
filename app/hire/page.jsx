@@ -5,7 +5,8 @@ import Navbar from "../../components/navbar.jsx"
 import Footer from "../../components/footer.jsx"
 import InteractiveBackground from "../../components/interactive-background"
 import Link from "next/link"
-import { hireMeAPI } from "../../lib/supabaseClient"
+import { supabase } from "../../lib/supabase/client"
+import { hireMeAPI } from "../../lib/api"
 
 const HirePage = () => {
   const [formData, setFormData] = useState({
@@ -109,7 +110,8 @@ const HirePage = () => {
       }
 
       // Submit to Supabase with file uploads
-      await hireMeAPI.submit(submissionData, attachments)
+      const api = hireMeAPI(supabase)
+      await api.submit(submissionData, attachments)
 
       setUploadProgress(100)
       setIsSubmitting(false)

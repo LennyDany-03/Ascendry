@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import Image from "next/image"
 import Logo from '../app/favicon.ico'
 
@@ -57,9 +56,9 @@ const Navbar = () => {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex-shrink-0">
-              <Link href="/" className="group flex items-center space-x-3">
+              <a href="/" className="group flex items-center space-x-3">
                 <div className="relative">
-                  <Image src={Logo} width={45}/>
+                  <Image src={Logo} width={45} alt="Ascendry Logo"/>
                 </div>
                 <span
                   className={`font-black text-white group-hover:text-gray-200 transition-all duration-300 ${
@@ -68,14 +67,14 @@ const Navbar = () => {
                 >
                   ASCENDRY
                 </span>
-              </Link>
+              </a>
             </div>
 
             {/* Centered Desktop Navigation */}
             <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
               <div className={`flex items-center transition-all duration-300 ${scrolled ? "space-x-6" : "space-x-8"}`}>
                 {navLinks.map((link) => (
-                  <Link
+                  <a
                     key={link.name}
                     href={link.href}
                     className={`relative text-gray-400 hover:text-white font-semibold transition-all duration-300 group ${
@@ -87,14 +86,14 @@ const Navbar = () => {
 
                     {/* Hover glow effect */}
                     <div className="absolute inset-0 bg-white/5 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 -z-10"></div>
-                  </Link>
+                  </a>
                 ))}
               </div>
             </div>
 
             {/* CTA Button */}
             <div className="hidden md:block">
-              <Link
+              <a
                 href="hire"
                 className={`bg-white hover:bg-gray-200 text-black font-semibold rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg relative overflow-hidden group ${
                   scrolled ? "px-4 py-2 text-sm" : "px-6 py-3 text-base"
@@ -104,7 +103,7 @@ const Navbar = () => {
 
                 {/* Shine effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-              </Link>
+              </a>
             </div>
 
             {/* Mobile Menu Button */}
@@ -146,22 +145,22 @@ const Navbar = () => {
           <div className="px-6 py-4 border-t border-gray-700/50 bg-black/50 backdrop-blur-xl rounded-b-xl">
             <div className="space-y-1">
               {navLinks.map((link) => (
-                <Link
+                <a
                   key={link.name}
                   href={link.href}
                   className="block text-gray-400 hover:text-white py-3 px-4 font-medium transition-all duration-300 hover:bg-white/5 rounded-lg"
                   onClick={() => setIsOpen(false)}
                 >
                   {link.name}
-                </Link>
+                </a>
               ))}
-              <Link
+              <a
                 href="hire"
                 className="block bg-white text-black px-4 py-3 mt-4 text-center font-semibold rounded-lg hover:bg-gray-200 transition-all duration-300"
                 onClick={() => setIsOpen(false)}
               >
                 Hire Me
-              </Link>
+              </a>
             </div>
           </div>
         </div>

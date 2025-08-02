@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase } from "../../../lib/supabaseClient"
+import { supabase } from "../../../lib/supabase/client"
+import { authAPI } from "../../../lib/api"
 import Navbar from "../../../components/navbar.jsx"
 import Footer from "../../../components/footer.jsx"
 import InteractiveBackground from "../../../components/interactive-background"
@@ -12,6 +13,7 @@ const AdminLoginPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const router = useRouter()
+  const auth = authAPI(supabase)
 
   // Track mouse movement for interactive effects
   useEffect(() => {
@@ -26,50 +28,42 @@ const AdminLoginPage = () => {
   // Check if user is already logged in
   useEffect(() => {
     const checkUser = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
+      try {
+        const { session } = await auth.getSession()
 
-      if (session) {
-        // Check if user has admin access
-        const { data: adminData } = await supabase
-          .from("admin_access")
-          .select("*")
-          .eq("email", session.user.email)
-          .eq("is_active", true)
-          .single()
+        if (session) {
+          // Check if user has admin access
+          const { data: adminData } = await supabase
+            .from("admin_access")
+            .select("*")
+            .eq("email", session.user.email)
+            .eq("is_active", true)
+            .maybeSingle()
 
-        if (adminData) {
-          router.push("/admin/dashboard")
+          if (adminData) {
+            router.push("/admin/dashboard")
+          }
         }
+      } catch (error) {
+        console.error("Error checking user:", error)
       }
     }
 
     checkUser()
-  }, [router])
+  }, [router, auth])
 
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true)
 
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/admin/auth/callback`,
-        },
+      await auth.signInWithOAuth("google", {
+        redirectTo: `${window.location.origin}/admin/auth/callback`,
       })
-
-      if (error) {
-        console.error("Login error:", error.message)
-        alert("Login failed: " + error.message)
-        setIsLoading(false)
-        return
-      }
 
       // OAuth redirect will handle the rest
     } catch (error) {
-      console.error("Unexpected error:", error)
-      alert("An unexpected error occurred")
+      console.error("Login error:", error.message)
+      alert("Login failed: " + error.message)
       setIsLoading(false)
     }
   }
