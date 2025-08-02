@@ -22,6 +22,7 @@ const HirePage = () => {
     availableDate: "",
     hearAbout: "",
   })
+
   const [attachments, setAttachments] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
@@ -34,7 +35,7 @@ const HirePage = () => {
   // Calendar picker states
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState(null)
+  const [selectedDate, setSelectedDate] = useState(formData.availableDate ? new Date(formData.availableDate) : null)
 
   // Time picker states
   const [isTimeOpen, setIsTimeOpen] = useState(false)
@@ -42,45 +43,90 @@ const HirePage = () => {
   const [selectedMinute, setSelectedMinute] = useState(0)
   const [selectedPeriod, setSelectedPeriod] = useState("AM")
 
-  // Initialize selected date only once
+  // Update selected date when form data changes
   useEffect(() => {
-    if (formData.availableDate && !selectedDate) {
-      const date = new Date(formData.availableDate)
-      setSelectedDate(date)
-      setCurrentMonth(date)
+    if (formData.availableDate && formData.availableDate !== "") {
+      const newDate = new Date(formData.availableDate)
+      if (!isNaN(newDate.getTime())) {
+        setSelectedDate(newDate)
+        setCurrentMonth(newDate)
+      }
     }
-  }, [formData.availableDate, selectedDate])
+  }, [formData.availableDate])
 
-  // Initialize time picker only once
+  // Update time picker when form data changes
   useEffect(() => {
-    if (formData.availableTime) {
+    if (formData.availableTime && formData.availableTime !== "") {
       const [hours, minutes] = formData.availableTime.split(":")
       const hour24 = Number.parseInt(hours, 10)
       const minute = Number.parseInt(minutes, 10)
 
-      setSelectedMinute(minute)
-
-      if (hour24 === 0) {
-        setSelectedHour(12)
-        setSelectedPeriod("AM")
-      } else if (hour24 < 12) {
-        setSelectedHour(hour24)
-        setSelectedPeriod("AM")
-      } else if (hour24 === 12) {
-        setSelectedHour(12)
-        setSelectedPeriod("PM")
-      } else {
-        setSelectedHour(hour24 - 12)
-        setSelectedPeriod("PM")
+      if (!isNaN(hour24) && !isNaN(minute)) {
+        setSelectedMinute(minute)
+        if (hour24 === 0) {
+          setSelectedHour(12)
+          setSelectedPeriod("AM")
+        } else if (hour24 < 12) {
+          setSelectedHour(hour24)
+          setSelectedPeriod("AM")
+        } else if (hour24 === 12) {
+          setSelectedHour(12)
+          setSelectedPeriod("PM")
+        } else {
+          setSelectedHour(hour24 - 12)
+          setSelectedPeriod("PM")
+        }
       }
     }
   }, [formData.availableTime])
 
   const handleInputChange = (e) => {
+    const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }))
+  }
+
+  // Form validation function
+  const isFormValid = () => {
+    const requiredFields = {
+      1: ["fullName", "email"],
+      2: ["projectType", "budget", "timeline", "projectDescription"],
+      3: ["contactMethod"],
+      4: [],
+    }
+
+    const currentRequiredFields = requiredFields[currentStep] || []
+
+    return currentRequiredFields.every((field) => {
+      const value = formData[field]
+      return value && value.toString().trim() !== ""
+    })
+  }
+
+  // Get missing fields for error messages
+  const getMissingFields = () => {
+    const requiredFields = {
+      1: { fullName: "Full Name", email: "Email Address" },
+      2: {
+        projectType: "Project Type",
+        budget: "Budget Range",
+        timeline: "Timeline",
+        projectDescription: "Project Description",
+      },
+      3: { contactMethod: "Contact Method" },
+      4: {},
+    }
+
+    const currentRequiredFields = requiredFields[currentStep] || {}
+
+    return Object.entries(currentRequiredFields)
+      .filter(([field]) => {
+        const value = formData[field]
+        return !value || value.toString().trim() === ""
+      })
+      .map(([, label]) => label)
   }
 
   // Calendar helper functions
@@ -108,7 +154,6 @@ const HirePage = () => {
     const lastDay = new Date(year, month + 1, 0)
     const daysInMonth = lastDay.getDate()
     const startingDayOfWeek = firstDay.getDay()
-
     const days = []
 
     // Add empty cells for days before the first day of the month
@@ -143,9 +188,9 @@ const HirePage = () => {
   }
 
   const isToday = (date) => {
-    if (!date) return false
     const today = new Date()
     return (
+      date &&
       date.getDate() === today.getDate() &&
       date.getMonth() === today.getMonth() &&
       date.getFullYear() === today.getFullYear()
@@ -153,8 +198,9 @@ const HirePage = () => {
   }
 
   const isSameDay = (date1, date2) => {
-    if (!date1 || !date2) return false
     return (
+      date1 &&
+      date2 &&
       date1.getDate() === date2.getDate() &&
       date1.getMonth() === date2.getMonth() &&
       date1.getFullYear() === date2.getFullYear()
@@ -162,7 +208,6 @@ const HirePage = () => {
   }
 
   const isPastDate = (date) => {
-    if (!date) return false
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     return date < today
@@ -210,7 +255,6 @@ const HirePage = () => {
     const [hours, minutes] = formData.availableTime.split(":")
     const hour24 = Number.parseInt(hours, 10)
     const minute = Number.parseInt(minutes, 10)
-
     let displayHour = hour24
     let period = "AM"
 
@@ -296,38 +340,49 @@ const HirePage = () => {
 
     // Prevent double submission
     if (isSubmitting) {
-      console.log("Already submitting, preventing double submission")
+      console.log("Form is already submitting, preventing double submission")
       return
     }
 
     console.log("Starting form submission...")
+
+    // Validate all required fields for final submission
+    const allRequiredFields = [
+      "fullName",
+      "email",
+      "projectType",
+      "budget",
+      "timeline",
+      "projectDescription",
+      "contactMethod",
+    ]
+    const missingFields = allRequiredFields.filter((field) => {
+      const value = formData[field]
+      return !value || value.toString().trim() === ""
+    })
+
+    if (missingFields.length > 0) {
+      const fieldLabels = {
+        fullName: "Full Name",
+        email: "Email Address",
+        projectType: "Project Type",
+        budget: "Budget Range",
+        timeline: "Timeline",
+        projectDescription: "Project Description",
+        contactMethod: "Contact Method",
+      }
+      const missingFieldNames = missingFields.map((field) => fieldLabels[field]).join(", ")
+      setSubmitError(`Please fill in the following required fields: ${missingFieldNames}`)
+      return
+    }
+
     setIsSubmitting(true)
     setSubmitError("")
     setUploadProgress(0)
 
     try {
-      // Validate required fields
-      const requiredFields = {
-        fullName: formData.fullName,
-        email: formData.email,
-        projectType: formData.projectType,
-        budget: formData.budget,
-        timeline: formData.timeline,
-        projectDescription: formData.projectDescription,
-        contactMethod: formData.contactMethod,
-      }
+      console.log("Preparing submission data...")
 
-      const missingFields = Object.entries(requiredFields)
-        .filter(([key, value]) => !value || value.trim() === "")
-        .map(([key]) => key)
-
-      if (missingFields.length > 0) {
-        throw new Error(`Please fill in all required fields: ${missingFields.join(", ")}`)
-      }
-
-      console.log("Validation passed, preparing submission data...")
-
-      // Prepare form data for submission
       const submissionData = {
         full_name: formData.fullName.trim(),
         email: formData.email.trim(),
@@ -347,33 +402,34 @@ const HirePage = () => {
 
       console.log("Submission data prepared:", submissionData)
 
-      // Show upload progress if files are present
       if (attachments.length > 0) {
         console.log(`Uploading ${attachments.length} files...`)
         setUploadProgress(25)
       }
 
-      // Submit to Supabase with file uploads
-      console.log("Calling hireMeAPI...")
-      const api = hireMeAPI(supabase)
+      // Initialize API
+      if (!supabase) {
+        throw new Error("Supabase client not initialized")
+      }
 
+      const api = hireMeAPI(supabase)
       if (!api || typeof api.submit !== "function") {
         throw new Error("API not properly initialized")
       }
 
-      const result = await api.submit(submissionData, attachments)
-      console.log("Submission successful:", result)
+      console.log("Submitting to API...")
+      await api.submit(submissionData, attachments)
 
+      console.log("Submission successful!")
       setUploadProgress(100)
+      setIsSubmitting(false)
       setShowSuccessModal(true)
 
-      // Trigger tick animation after modal appears
       setTimeout(() => {
         setShowTickAnimation(true)
       }, 300)
 
       // Reset form
-      console.log("Resetting form...")
       setFormData({
         fullName: "",
         email: "",
@@ -392,17 +448,15 @@ const HirePage = () => {
       setSelectedDate(null)
       setCurrentStep(1)
 
-      // Auto close modal after 4 seconds
       setTimeout(() => {
         setShowSuccessModal(false)
         setShowTickAnimation(false)
       }, 4000)
     } catch (error) {
       console.error("Form submission error:", error)
-      setSubmitError(error.message || "Failed to submit form. Please try again.")
-    } finally {
-      console.log("Submission process completed")
+      setSubmitError(`Failed to submit form: ${error.message || "Please try again."}`)
       setIsSubmitting(false)
+      setUploadProgress(0)
     }
   }
 
@@ -412,11 +466,23 @@ const HirePage = () => {
   }
 
   const nextStep = () => {
-    if (currentStep < 4) setCurrentStep(currentStep + 1)
+    if (currentStep < 4 && isFormValid()) {
+      setCurrentStep((prev) => prev + 1)
+    } else if (!isFormValid()) {
+      const missing = getMissingFields()
+      setSubmitError(`Please fill in the following required fields: ${missing.join(", ")}`)
+    }
   }
 
   const prevStep = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1)
+    if (currentStep > 1) {
+      setCurrentStep((prev) => prev - 1)
+      setSubmitError("") // Clear any error when going back
+    }
+  }
+
+  const dismissError = () => {
+    setSubmitError("")
   }
 
   // Prevent body scroll when modal is open
@@ -426,7 +492,6 @@ const HirePage = () => {
     } else {
       document.body.style.overflow = "unset"
     }
-
     return () => {
       document.body.style.overflow = "unset"
     }
@@ -460,35 +525,22 @@ const HirePage = () => {
   ]
 
   const days = getDaysInMonth(currentMonth)
-
   const stepTitles = ["Personal Info", "Project Details", "Communication", "Review & Submit"]
 
   const isStepValid = (step) => {
-    switch (step) {
-      case 1:
-        return formData.fullName.trim() && formData.email.trim()
-      case 2:
-        return formData.projectType && formData.budget && formData.timeline && formData.projectDescription.trim()
-      case 3:
-        return formData.contactMethod
-      case 4:
-        return true
-      default:
-        return false
+    const requiredFields = {
+      1: ["fullName", "email"],
+      2: ["projectType", "budget", "timeline", "projectDescription"],
+      3: ["contactMethod"],
+      4: [],
     }
-  }
 
-  // Check if all required fields are filled for final submission
-  const isFormValid = () => {
-    return (
-      formData.fullName.trim() &&
-      formData.email.trim() &&
-      formData.projectType &&
-      formData.budget &&
-      formData.timeline &&
-      formData.projectDescription.trim() &&
-      formData.contactMethod
-    )
+    const currentRequiredFields = requiredFields[step] || []
+
+    return currentRequiredFields.every((field) => {
+      const value = formData[field]
+      return value && value.toString().trim() !== ""
+    })
   }
 
   return (
@@ -562,14 +614,12 @@ const HirePage = () => {
               <span className="text-blue-400 font-medium">Hire Me</span>
             </div>
           </nav>
-
           <div className="mb-8">
             <div className="inline-flex items-center space-x-3 px-6 py-3 bg-green-500/10 backdrop-blur-sm rounded-full border border-green-500/30">
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
               <span className="text-green-400 font-medium">Available for New Projects</span>
             </div>
           </div>
-
           <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight">
             <span className="bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
               Let's Create Something
@@ -579,7 +629,6 @@ const HirePage = () => {
               Extraordinary
             </span>
           </h1>
-
           <p className="text-xl text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed">
             Ready to bring your vision to life? Let's discuss your project and create something amazing together.
           </p>
@@ -625,14 +674,16 @@ const HirePage = () => {
       {/* Error Message */}
       {submitError && (
         <div className="max-w-4xl mx-auto px-6 mb-8">
-          <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-4 text-center backdrop-blur-xl">
-            <p className="text-red-400 font-medium">⚠️ {submitError}</p>
-            <button
-              onClick={() => setSubmitError("")}
-              className="mt-2 text-red-300 hover:text-red-200 text-sm underline"
-            >
-              Dismiss
-            </button>
+          <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-4 backdrop-blur-xl">
+            <div className="flex items-center justify-between">
+              <p className="text-red-400 font-medium">⚠️ {submitError}</p>
+              <button
+                onClick={dismissError}
+                className="text-red-400 hover:text-red-300 transition-colors duration-300 ml-4"
+              >
+                ✕
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -675,7 +726,6 @@ const HirePage = () => {
                     <p className="text-gray-400">Tell us about yourself</p>
                   </div>
                 </div>
-
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-3">
                     <label className="block text-gray-300 font-medium">
@@ -691,7 +741,6 @@ const HirePage = () => {
                       placeholder="Enter your full name"
                     />
                   </div>
-
                   <div className="space-y-3">
                     <label className="block text-gray-300 font-medium">
                       Email Address <span className="text-red-400">*</span>
@@ -707,7 +756,6 @@ const HirePage = () => {
                     />
                   </div>
                 </div>
-
                 <div className="mt-6 space-y-3">
                   <label className="block text-gray-300 font-medium">
                     Company / Organization <span className="text-gray-500">(Optional)</span>
@@ -736,7 +784,6 @@ const HirePage = () => {
                     <p className="text-gray-400">Tell us about your project</p>
                   </div>
                 </div>
-
                 <div className="grid md:grid-cols-2 gap-6 mb-6">
                   <div className="space-y-3">
                     <label className="block text-gray-300 font-medium">
@@ -759,7 +806,6 @@ const HirePage = () => {
                       ))}
                     </select>
                   </div>
-
                   <div className="space-y-3">
                     <label className="block text-gray-300 font-medium">
                       Budget Range <span className="text-red-400">*</span>
@@ -782,7 +828,6 @@ const HirePage = () => {
                     </select>
                   </div>
                 </div>
-
                 <div className="mb-6 space-y-3">
                   <label className="block text-gray-300 font-medium">
                     Timeline <span className="text-red-400">*</span>
@@ -804,7 +849,6 @@ const HirePage = () => {
                     ))}
                   </select>
                 </div>
-
                 <div className="space-y-3">
                   <label className="block text-gray-300 font-medium">
                     Project Description <span className="text-red-400">*</span>
@@ -841,7 +885,6 @@ const HirePage = () => {
                     className="hidden"
                     accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.webp,.zip"
                   />
-
                   {attachments.length > 0 && (
                     <div className="space-y-2 mt-4">
                       <h4 className="text-gray-300 font-medium">📁 Attached Files:</h4>
@@ -853,7 +896,7 @@ const HirePage = () => {
                           <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
                               <span className="text-purple-400 text-xs font-bold">
-                                {file.name.split(".").pop()?.toUpperCase()}
+                                {file.name.split(".").pop().toUpperCase()}
                               </span>
                             </div>
                             <div>
@@ -992,7 +1035,6 @@ const HirePage = () => {
                                 </svg>
                               </button>
                             </div>
-
                             <div className="grid grid-cols-7 gap-1 mb-2">
                               {daysOfWeek.map((day) => (
                                 <div key={day} className="text-center text-xs font-medium text-gray-400 py-2">
@@ -1000,7 +1042,6 @@ const HirePage = () => {
                                 </div>
                               ))}
                             </div>
-
                             <div className="grid grid-cols-7 gap-1">
                               {days.map((date, index) => (
                                 <button
@@ -1022,7 +1063,6 @@ const HirePage = () => {
                                 </button>
                               ))}
                             </div>
-
                             <div className="flex gap-2 mt-4 pt-3 border-t border-gray-700">
                               <button
                                 type="button"
@@ -1096,7 +1136,6 @@ const HirePage = () => {
                                 ))}
                               </div>
                             </div>
-
                             <div className="border-t border-gray-700 pt-4">
                               <h4 className="text-sm font-medium text-gray-400 mb-3">🕐 Custom Time</h4>
                               <div className="flex items-center justify-center space-x-3 mb-4">
@@ -1157,7 +1196,6 @@ const HirePage = () => {
                                   </div>
                                 </div>
                               </div>
-
                               <div className="text-center">
                                 <div className="mb-3">
                                   <span className="text-gray-400 text-sm">Selected: </span>
@@ -1217,7 +1255,6 @@ const HirePage = () => {
                     <p className="text-gray-400">Please review your information</p>
                   </div>
                 </div>
-
                 <div className="space-y-6">
                   {/* Personal Info Review */}
                   <div className="bg-black/20 rounded-xl p-4 border border-gray-700/30">
@@ -1338,13 +1375,11 @@ const HirePage = () => {
               >
                 ← Previous
               </button>
-
               <div className="text-center">
                 <span className="text-gray-400 text-sm">
                   Step {currentStep} of {stepTitles.length}
                 </span>
               </div>
-
               {currentStep < 4 ? (
                 <button
                   type="button"
@@ -1394,88 +1429,76 @@ const HirePage = () => {
           from { opacity: 0; }
           to { opacity: 1; }
         }
-
         @keyframes scale-in {
-          from { 
-            opacity: 0; 
-            transform: scale(0.9) translateY(20px); 
-          }
-          to { 
-            opacity: 1; 
-            transform: scale(1) translateY(0); 
-          }
+          from {
+             opacity: 0;
+             transform: scale(0.9) translateY(20px);
+           }
+          to {
+             opacity: 1;
+             transform: scale(1) translateY(0);
+           }
         }
-
         @keyframes slide-in {
-          from { 
-            opacity: 0; 
-            transform: translateX(20px); 
-          }
-          to { 
-            opacity: 1; 
-            transform: translateX(0); 
-          }
+          from {
+             opacity: 0;
+             transform: translateX(20px);
+           }
+          to {
+             opacity: 1;
+             transform: translateX(0);
+           }
         }
-
         @keyframes tick-circle {
-          0% { 
-            transform: scale(0.8); 
-            border-color: #6b7280; 
-          }
-          50% { 
-            transform: scale(1.1); 
-            border-color: #10b981; 
-          }
-          100% { 
-            transform: scale(1); 
-            border-color: #10b981; 
-          }
+          0% {
+             transform: scale(0.8);
+             border-color: #6b7280;
+           }
+          50% {
+             transform: scale(1.1);
+             border-color: #10b981;
+           }
+          100% {
+             transform: scale(1);
+             border-color: #10b981;
+           }
         }
-
         @keyframes tick-draw {
-          0% { 
-            opacity: 0;
+          0% {
+             opacity: 0;
             stroke-dasharray: 0 50;
           }
-          50% { 
-            opacity: 1;
+          50% {
+             opacity: 1;
             stroke-dasharray: 25 50;
           }
-          100% { 
-            opacity: 1;
+          100% {
+             opacity: 1;
             stroke-dasharray: 50 50;
           }
         }
-
         @keyframes spin-slow {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
-
         .animate-fade-in {
           animation: fade-in 0.3s ease-out forwards;
         }
-
         .animate-scale-in {
           animation: scale-in 0.4s ease-out forwards;
         }
-
         .animate-slide-in {
           animation: slide-in 0.5s ease-out forwards;
         }
-
         .animate-tick-circle {
           animation: tick-circle 0.6s ease-out forwards;
         }
-
         .animate-tick-draw {
           animation: tick-draw 0.8s ease-out 0.3s forwards;
         }
-
         .animate-spin-slow {
           animation: spin-slow 20s linear infinite;
         }
-
         .tick-path {
           stroke-dasharray: 50;
           stroke-dashoffset: 50;
