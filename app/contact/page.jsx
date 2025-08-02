@@ -7,7 +7,7 @@ import InteractiveBackground from "../../components/interactive-background"
 import Link from "next/link"
 import Image from "next/image.js"
 
-import Lenny from "../../assets/Lenny.jpg"
+import Lenny from "../../assets/Lenny.png"
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({

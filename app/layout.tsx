@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: "Ascendry - Digital Innovation Studio",
   description:
     "Transform your ideas into digital reality with cutting-edge web development, AI solutions, and innovative design.",
+  icons: {
+    icon: "/favicon.ico", // Path to your favicon file in /public
+  },
 }
 
 export default function RootLayout({

@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
+import Logo from '../app/favicon.ico'
+
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -56,15 +59,7 @@ const Navbar = () => {
             <div className="flex-shrink-0">
               <Link href="/" className="group flex items-center space-x-3">
                 <div className="relative">
-                  <div
-                    className={`bg-white group-hover:bg-gray-200 transition-all duration-300 rounded-lg flex items-center justify-center ${
-                      scrolled ? "w-8 h-8" : "w-10 h-10"
-                    }`}
-                  >
-                    <div
-                      className={`bg-black rounded-sm transition-all duration-300 ${scrolled ? "w-4 h-4" : "w-6 h-6"}`}
-                    ></div>
-                  </div>
+                  <Image src={Logo} width={45}/>
                 </div>
                 <span
                   className={`font-black text-white group-hover:text-gray-200 transition-all duration-300 ${
