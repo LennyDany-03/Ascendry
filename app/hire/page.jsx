@@ -28,13 +28,224 @@ const HirePage = () => {
   const [showTickAnimation, setShowTickAnimation] = useState(false)
   const [submitError, setSubmitError] = useState("")
   const [uploadProgress, setUploadProgress] = useState(0)
+  const [currentStep, setCurrentStep] = useState(1)
   const fileInputRef = useRef(null)
 
+  // Calendar picker states
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+  const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState(null)
+
+  // Time picker states
+  const [isTimeOpen, setIsTimeOpen] = useState(false)
+  const [selectedHour, setSelectedHour] = useState(9)
+  const [selectedMinute, setSelectedMinute] = useState(0)
+  const [selectedPeriod, setSelectedPeriod] = useState("AM")
+
+  // Initialize selected date only once
+  useEffect(() => {
+    if (formData.availableDate && !selectedDate) {
+      const date = new Date(formData.availableDate)
+      setSelectedDate(date)
+      setCurrentMonth(date)
+    }
+  }, [formData.availableDate, selectedDate])
+
+  // Initialize time picker only once
+  useEffect(() => {
+    if (formData.availableTime) {
+      const [hours, minutes] = formData.availableTime.split(":")
+      const hour24 = Number.parseInt(hours, 10)
+      const minute = Number.parseInt(minutes, 10)
+
+      setSelectedMinute(minute)
+
+      if (hour24 === 0) {
+        setSelectedHour(12)
+        setSelectedPeriod("AM")
+      } else if (hour24 < 12) {
+        setSelectedHour(hour24)
+        setSelectedPeriod("AM")
+      } else if (hour24 === 12) {
+        setSelectedHour(12)
+        setSelectedPeriod("PM")
+      } else {
+        setSelectedHour(hour24 - 12)
+        setSelectedPeriod("PM")
+      }
+    }
+  }, [formData.availableTime])
+
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
+    }))
+  }
+
+  // Calendar helper functions
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ]
+
+  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const daysInMonth = lastDay.getDate()
+    const startingDayOfWeek = firstDay.getDay()
+
+    const days = []
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null)
+    }
+
+    // Add days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(new Date(year, month, day))
+    }
+
+    return days
+  }
+
+  const handleDateSelect = (date) => {
+    setSelectedDate(date)
+    const formattedDate = date.toISOString().split("T")[0]
+    setFormData((prev) => ({
+      ...prev,
+      availableDate: formattedDate,
+    }))
+    setIsCalendarOpen(false)
+  }
+
+  const navigateMonth = (direction) => {
+    setCurrentMonth((prev) => {
+      const newMonth = new Date(prev)
+      newMonth.setMonth(prev.getMonth() + direction)
+      return newMonth
     })
+  }
+
+  const isToday = (date) => {
+    if (!date) return false
+    const today = new Date()
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    )
+  }
+
+  const isSameDay = (date1, date2) => {
+    if (!date1 || !date2) return false
+    return (
+      date1.getDate() === date2.getDate() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear()
+    )
+  }
+
+  const isPastDate = (date) => {
+    if (!date) return false
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return date < today
+  }
+
+  const formatDisplayDate = (date) => {
+    if (!date) return "Select your available date"
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+  }
+
+  // Time picker helper functions
+  const hours = Array.from({ length: 12 }, (_, i) => i + 1)
+  const minutes = Array.from({ length: 12 }, (_, i) => i * 5)
+
+  const formatTime = (hour, minute, period) => {
+    return `${hour}:${minute.toString().padStart(2, "0")} ${period}`
+  }
+
+  const formatTime24 = (hour, minute, period) => {
+    let hour24 = hour
+    if (period === "AM" && hour === 12) {
+      hour24 = 0
+    } else if (period === "PM" && hour !== 12) {
+      hour24 = hour + 12
+    }
+    return `${hour24.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`
+  }
+
+  const handleTimeSelect = () => {
+    const time24 = formatTime24(selectedHour, selectedMinute, selectedPeriod)
+    setFormData((prev) => ({
+      ...prev,
+      availableTime: time24,
+    }))
+    setIsTimeOpen(false)
+  }
+
+  const getDisplayTime = () => {
+    if (!formData.availableTime) return "Select your available time"
+    const [hours, minutes] = formData.availableTime.split(":")
+    const hour24 = Number.parseInt(hours, 10)
+    const minute = Number.parseInt(minutes, 10)
+
+    let displayHour = hour24
+    let period = "AM"
+
+    if (hour24 === 0) {
+      displayHour = 12
+    } else if (hour24 > 12) {
+      displayHour = hour24 - 12
+      period = "PM"
+    } else if (hour24 === 12) {
+      period = "PM"
+    }
+
+    return `${displayHour}:${minute.toString().padStart(2, "0")} ${period}`
+  }
+
+  // Quick time options
+  const quickTimes = [
+    { label: "9:00 AM", hour: 9, minute: 0, period: "AM" },
+    { label: "10:00 AM", hour: 10, minute: 0, period: "AM" },
+    { label: "11:00 AM", hour: 11, minute: 0, period: "AM" },
+    { label: "2:00 PM", hour: 2, minute: 0, period: "PM" },
+    { label: "3:00 PM", hour: 3, minute: 0, period: "PM" },
+    { label: "4:00 PM", hour: 4, minute: 0, period: "PM" },
+  ]
+
+  const selectQuickTime = (time) => {
+    setSelectedHour(time.hour)
+    setSelectedMinute(time.minute)
+    setSelectedPeriod(time.period)
+    const time24 = formatTime24(time.hour, time.minute, time.period)
+    setFormData((prev) => ({
+      ...prev,
+      availableTime: time24,
+    }))
+    setIsTimeOpen(false)
   }
 
   const handleFileUpload = (e) => {
@@ -69,7 +280,7 @@ const HirePage = () => {
   }
 
   const removeFile = (index) => {
-    setAttachments(attachments.filter((_, i) => i !== index))
+    setAttachments((prev) => prev.filter((_, i) => i !== index))
   }
 
   const formatFileSize = (bytes) => {
@@ -82,39 +293,78 @@ const HirePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    // Prevent double submission
+    if (isSubmitting) {
+      console.log("Already submitting, preventing double submission")
+      return
+    }
+
+    console.log("Starting form submission...")
     setIsSubmitting(true)
     setSubmitError("")
     setUploadProgress(0)
 
     try {
-      // Prepare form data for submission - convert empty strings to null for optional fields
-      const submissionData = {
-        full_name: formData.fullName,
+      // Validate required fields
+      const requiredFields = {
+        fullName: formData.fullName,
         email: formData.email,
-        company: formData.company || null,
+        projectType: formData.projectType,
+        budget: formData.budget,
+        timeline: formData.timeline,
+        projectDescription: formData.projectDescription,
+        contactMethod: formData.contactMethod,
+      }
+
+      const missingFields = Object.entries(requiredFields)
+        .filter(([key, value]) => !value || value.trim() === "")
+        .map(([key]) => key)
+
+      if (missingFields.length > 0) {
+        throw new Error(`Please fill in all required fields: ${missingFields.join(", ")}`)
+      }
+
+      console.log("Validation passed, preparing submission data...")
+
+      // Prepare form data for submission
+      const submissionData = {
+        full_name: formData.fullName.trim(),
+        email: formData.email.trim(),
+        company: formData.company?.trim() || null,
         project_type: formData.projectType,
         budget: formData.budget,
         timeline: formData.timeline,
-        project_description: formData.projectDescription,
+        project_description: formData.projectDescription.trim(),
         contact_method: formData.contactMethod,
         available_time: formData.availableTime || null,
-        available_date: formData.availableDate || null, // Convert empty string to null
+        available_date: formData.availableDate || null,
         hear_about: formData.hearAbout || null,
         status: "new",
         priority: "medium",
+        created_at: new Date().toISOString(),
       }
+
+      console.log("Submission data prepared:", submissionData)
 
       // Show upload progress if files are present
       if (attachments.length > 0) {
+        console.log(`Uploading ${attachments.length} files...`)
         setUploadProgress(25)
       }
 
       // Submit to Supabase with file uploads
+      console.log("Calling hireMeAPI...")
       const api = hireMeAPI(supabase)
-      await api.submit(submissionData, attachments)
+
+      if (!api || typeof api.submit !== "function") {
+        throw new Error("API not properly initialized")
+      }
+
+      const result = await api.submit(submissionData, attachments)
+      console.log("Submission successful:", result)
 
       setUploadProgress(100)
-      setIsSubmitting(false)
       setShowSuccessModal(true)
 
       // Trigger tick animation after modal appears
@@ -123,6 +373,7 @@ const HirePage = () => {
       }, 300)
 
       // Reset form
+      console.log("Resetting form...")
       setFormData({
         fullName: "",
         email: "",
@@ -138,6 +389,8 @@ const HirePage = () => {
       })
       setAttachments([])
       setUploadProgress(0)
+      setSelectedDate(null)
+      setCurrentStep(1)
 
       // Auto close modal after 4 seconds
       setTimeout(() => {
@@ -146,15 +399,24 @@ const HirePage = () => {
       }, 4000)
     } catch (error) {
       console.error("Form submission error:", error)
-      setSubmitError("Failed to submit form. Please try again.")
+      setSubmitError(error.message || "Failed to submit form. Please try again.")
+    } finally {
+      console.log("Submission process completed")
       setIsSubmitting(false)
-      setUploadProgress(0)
     }
   }
 
   const closeModal = () => {
     setShowSuccessModal(false)
     setShowTickAnimation(false)
+  }
+
+  const nextStep = () => {
+    if (currentStep < 4) setCurrentStep(currentStep + 1)
+  }
+
+  const prevStep = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1)
   }
 
   // Prevent body scroll when modal is open
@@ -197,26 +459,61 @@ const HirePage = () => {
     "Other",
   ]
 
+  const days = getDaysInMonth(currentMonth)
+
+  const stepTitles = ["Personal Info", "Project Details", "Communication", "Review & Submit"]
+
+  const isStepValid = (step) => {
+    switch (step) {
+      case 1:
+        return formData.fullName.trim() && formData.email.trim()
+      case 2:
+        return formData.projectType && formData.budget && formData.timeline && formData.projectDescription.trim()
+      case 3:
+        return formData.contactMethod
+      case 4:
+        return true
+      default:
+        return false
+    }
+  }
+
+  // Check if all required fields are filled for final submission
+  const isFormValid = () => {
+    return (
+      formData.fullName.trim() &&
+      formData.email.trim() &&
+      formData.projectType &&
+      formData.budget &&
+      formData.timeline &&
+      formData.projectDescription.trim() &&
+      formData.contactMethod
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-black text-white relative">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white relative overflow-hidden">
       <InteractiveBackground />
       <Navbar />
 
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-blue-500/3 to-purple-500/3 rounded-full blur-3xl animate-spin-slow"></div>
+      </div>
+
       {/* Success Modal */}
       {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md animate-fade-in" onClick={closeModal} />
-
-          {/* Modal Content */}
-          <div className="relative bg-gray-900 border border-gray-700 rounded-3xl p-12 max-w-md mx-4 text-center animate-scale-in shadow-2xl">
-            {/* Tick Animation */}
-            <div className="mb-8">
+        <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-xl animate-fade-in" onClick={closeModal} />
+          <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-600 rounded-3xl p-8 max-w-md w-full text-center animate-scale-in shadow-2xl">
+            <div className="mb-6">
               <div
-                className={`w-24 h-24 mx-auto rounded-full border-4 border-green-500 flex items-center justify-center ${showTickAnimation ? "animate-tick-circle" : ""}`}
+                className={`w-20 h-20 mx-auto rounded-full border-4 border-green-500 flex items-center justify-center ${showTickAnimation ? "animate-tick-circle" : ""}`}
               >
                 <svg
-                  className={`w-12 h-12 text-green-500 ${showTickAnimation ? "animate-tick-draw" : "opacity-0"}`}
+                  className={`w-10 h-10 text-green-500 ${showTickAnimation ? "animate-tick-draw" : "opacity-0"}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -231,27 +528,21 @@ const HirePage = () => {
                 </svg>
               </div>
             </div>
-
-            {/* Success Message */}
             <div className="space-y-4">
-              <h3 className="text-3xl font-black text-white">Request Sent!</h3>
-              <p className="text-lg text-gray-300 leading-relaxed">
-                Thanks for reaching out! I'll get back to you within 24-48 hours.
-              </p>
+              <h3 className="text-2xl font-bold text-white">🎉 Request Sent Successfully!</h3>
+              <p className="text-gray-300">Thanks for reaching out! I'll get back to you within 24-48 hours.</p>
               {attachments.length > 0 && (
                 <p className="text-sm text-blue-400">
-                  📎 {attachments.length} file{attachments.length > 1 ? "s" : ""} uploaded successfully
+                  📎 {attachments.length} file{attachments.length > 1 ? "s" : ""} uploaded
                 </p>
               )}
-              <p className="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                Let's build something amazing together!
+              <p className="text-lg font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Let's build something amazing together! ✨
               </p>
             </div>
-
-            {/* Close Button */}
             <button
               onClick={closeModal}
-              className="mt-8 px-8 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-all duration-300 hover:scale-105"
+              className="mt-6 px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 hover:scale-105 shadow-lg"
             >
               Continue
             </button>
@@ -260,9 +551,8 @@ const HirePage = () => {
       )}
 
       {/* Hero Section */}
-      <section className="pt-32 pb-16 relative overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 text-center relative z-10">
-          {/* Breadcrumb */}
+      <section className="pt-32 pb-16 relative">
+        <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
           <nav className="mb-8">
             <div className="flex items-center justify-center space-x-3 text-sm">
               <Link href="/" className="text-gray-400 hover:text-white transition-colors duration-300">
@@ -273,7 +563,6 @@ const HirePage = () => {
             </div>
           </nav>
 
-          {/* Status Badge */}
           <div className="mb-8">
             <div className="inline-flex items-center space-x-3 px-6 py-3 bg-green-500/10 backdrop-blur-sm rounded-full border border-green-500/30">
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
@@ -281,45 +570,86 @@ const HirePage = () => {
             </div>
           </div>
 
-          {/* Main Title */}
-          <h1 className="text-6xl md:text-8xl font-black mb-6 leading-tight">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400">
-              Let's Build Your
+          <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight">
+            <span className="bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
+              Let's Create Something
             </span>
             <br />
-            <span className="text-white">Vision Together</span>
+            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Extraordinary
+            </span>
           </h1>
 
-          {/* Subtitle */}
-          <p className="text-xl md:text-2xl text-gray-400 mb-12 max-w-4xl mx-auto leading-relaxed">
-            Ready to transform your ideas into reality? Fill out the form below and let's create something
-            extraordinary.
+          <p className="text-xl text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed">
+            Ready to bring your vision to life? Let's discuss your project and create something amazing together.
           </p>
         </div>
       </section>
 
+      {/* Progress Indicator */}
+      <div className="max-w-4xl mx-auto px-6 mb-12">
+        <div className="bg-gray-900/50 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            {stepTitles.map((title, index) => (
+              <div key={index} className="flex items-center">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                    currentStep > index + 1
+                      ? "bg-green-500 text-white"
+                      : currentStep === index + 1
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-700 text-gray-400"
+                  }`}
+                >
+                  {currentStep > index + 1 ? "✓" : index + 1}
+                </div>
+                {index < stepTitles.length - 1 && (
+                  <div
+                    className={`w-16 h-1 mx-2 rounded transition-all duration-300 ${
+                      currentStep > index + 1 ? "bg-green-500" : "bg-gray-700"
+                    }`}
+                  ></div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-white">{stepTitles[currentStep - 1]}</h2>
+            <p className="text-gray-400 text-sm">
+              Step {currentStep} of {stepTitles.length}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Error Message */}
       {submitError && (
-        <div className="max-w-5xl mx-auto px-6 mb-8">
-          <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-4 text-center">
-            <p className="text-red-400">{submitError}</p>
+        <div className="max-w-4xl mx-auto px-6 mb-8">
+          <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-4 text-center backdrop-blur-xl">
+            <p className="text-red-400 font-medium">⚠️ {submitError}</p>
+            <button
+              onClick={() => setSubmitError("")}
+              className="mt-2 text-red-300 hover:text-red-200 text-sm underline"
+            >
+              Dismiss
+            </button>
           </div>
         </div>
       )}
 
       {/* Upload Progress */}
       {isSubmitting && uploadProgress > 0 && (
-        <div className="max-w-5xl mx-auto px-6 mb-8">
-          <div className="bg-gray-900/50 border border-gray-700/50 rounded-2xl p-6">
+        <div className="max-w-4xl mx-auto px-6 mb-8">
+          <div className="bg-gray-900/50 border border-gray-700/50 rounded-2xl p-6 backdrop-blur-xl">
             <div className="flex items-center space-x-4">
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-gray-300 font-medium">Uploading files...</span>
+                  <span className="text-gray-300 font-medium">📤 Uploading files...</span>
                   <span className="text-blue-400 font-bold">{uploadProgress}%</span>
                 </div>
-                <div className="w-full bg-gray-700 rounded-full h-2">
+                <div className="w-full bg-gray-700 rounded-full h-3">
                   <div
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-300 shadow-lg"
                     style={{ width: `${uploadProgress}%` }}
                   ></div>
                 </div>
@@ -329,23 +659,24 @@ const HirePage = () => {
         </div>
       )}
 
-      {/* Modern Form Section */}
-      <section className="py-20 relative">
-        <div className="max-w-5xl mx-auto px-6">
-          <form onSubmit={handleSubmit} className="space-y-12">
-            {/* Personal Information Card */}
-            <div className="group relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative bg-gray-900/60 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-10 hover:border-gray-600/50 transition-all duration-300">
-                <div className="flex items-center space-x-3 mb-8">
+      {/* Main Form */}
+      <section className="pb-20 relative">
+        <div className="max-w-4xl mx-auto px-6">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Step 1: Personal Information */}
+            {currentStep === 1 && (
+              <div className="bg-gray-900/60 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-8 shadow-2xl animate-slide-in">
+                <div className="flex items-center space-x-4 mb-8">
                   <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-                    <span className="text-white text-xl font-bold">1</span>
+                    <span className="text-white text-xl">👤</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white">Personal Information</h3>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">Personal Information</h3>
+                    <p className="text-gray-400">Tell us about yourself</p>
+                  </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-8">
-                  {/* Full Name */}
+                <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-3">
                     <label className="block text-gray-300 font-medium">
                       Full Name <span className="text-red-400">*</span>
@@ -356,12 +687,11 @@ const HirePage = () => {
                       value={formData.fullName}
                       onChange={handleInputChange}
                       required
-                      className="w-full bg-black/40 border border-gray-600/50 rounded-2xl px-6 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/20 transition-all duration-300 backdrop-blur-sm"
+                      className="w-full bg-black/40 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-300"
                       placeholder="Enter your full name"
                     />
                   </div>
 
-                  {/* Email */}
                   <div className="space-y-3">
                     <label className="block text-gray-300 font-medium">
                       Email Address <span className="text-red-400">*</span>
@@ -372,42 +702,42 @@ const HirePage = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                       required
-                      className="w-full bg-black/40 border border-gray-600/50 rounded-2xl px-6 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/20 transition-all duration-300 backdrop-blur-sm"
+                      className="w-full bg-black/40 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-300"
                       placeholder="your.email@example.com"
                     />
                   </div>
                 </div>
 
-                {/* Company */}
-                <div className="mt-8 space-y-3">
+                <div className="mt-6 space-y-3">
                   <label className="block text-gray-300 font-medium">
-                    Company / Brand <span className="text-gray-500">(Optional)</span>
+                    Company / Organization <span className="text-gray-500">(Optional)</span>
                   </label>
                   <input
                     type="text"
                     name="company"
                     value={formData.company}
                     onChange={handleInputChange}
-                    className="w-full bg-black/40 border border-gray-600/50 rounded-2xl px-6 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/20 transition-all duration-300 backdrop-blur-sm"
-                    placeholder="Your company or brand name"
+                    className="w-full bg-black/40 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-all duration-300"
+                    placeholder="Your company or organization name"
                   />
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Project Details Card */}
-            <div className="group relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-3xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative bg-gray-900/60 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-10 hover:border-gray-600/50 transition-all duration-300">
-                <div className="flex items-center space-x-3 mb-8">
+            {/* Step 2: Project Details */}
+            {currentStep === 2 && (
+              <div className="bg-gray-900/60 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-8 shadow-2xl animate-slide-in">
+                <div className="flex items-center space-x-4 mb-8">
                   <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                    <span className="text-white text-xl font-bold">2</span>
+                    <span className="text-white text-xl">🚀</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white">Project Details</h3>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">Project Details</h3>
+                    <p className="text-gray-400">Tell us about your project</p>
+                  </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-8">
-                  {/* Project Type */}
+                <div className="grid md:grid-cols-2 gap-6 mb-6">
                   <div className="space-y-3">
                     <label className="block text-gray-300 font-medium">
                       Project Type <span className="text-red-400">*</span>
@@ -417,7 +747,7 @@ const HirePage = () => {
                       value={formData.projectType}
                       onChange={handleInputChange}
                       required
-                      className="w-full bg-black/40 border border-gray-600/50 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-white focus:ring-2 focus:ring-white/20 transition-all duration-300 backdrop-blur-sm"
+                      className="w-full bg-black/40 border border-gray-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all duration-300"
                     >
                       <option value="" className="bg-gray-900">
                         Select project type
@@ -430,17 +760,16 @@ const HirePage = () => {
                     </select>
                   </div>
 
-                  {/* Budget */}
                   <div className="space-y-3">
                     <label className="block text-gray-300 font-medium">
-                      Estimated Budget <span className="text-red-400">*</span>
+                      Budget Range <span className="text-red-400">*</span>
                     </label>
                     <select
                       name="budget"
                       value={formData.budget}
                       onChange={handleInputChange}
                       required
-                      className="w-full bg-black/40 border border-gray-600/50 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-white focus:ring-2 focus:ring-white/20 transition-all duration-300 backdrop-blur-sm"
+                      className="w-full bg-black/40 border border-gray-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all duration-300"
                     >
                       <option value="" className="bg-gray-900">
                         Select budget range
@@ -454,17 +783,16 @@ const HirePage = () => {
                   </div>
                 </div>
 
-                {/* Timeline */}
-                <div className="mt-8 space-y-3">
+                <div className="mb-6 space-y-3">
                   <label className="block text-gray-300 font-medium">
-                    Project Timeline <span className="text-red-400">*</span>
+                    Timeline <span className="text-red-400">*</span>
                   </label>
                   <select
                     name="timeline"
                     value={formData.timeline}
                     onChange={handleInputChange}
                     required
-                    className="w-full bg-black/40 border border-gray-600/50 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-white focus:ring-2 focus:ring-white/20 transition-all duration-300 backdrop-blur-sm"
+                    className="w-full bg-black/40 border border-gray-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all duration-300"
                   >
                     <option value="" className="bg-gray-900">
                       Select timeline
@@ -477,91 +805,88 @@ const HirePage = () => {
                   </select>
                 </div>
 
-                {/* Project Description */}
-                <div className="mt-8 space-y-3">
+                <div className="space-y-3">
                   <label className="block text-gray-300 font-medium">
-                    Describe Your Project <span className="text-red-400">*</span>
+                    Project Description <span className="text-red-400">*</span>
                   </label>
                   <textarea
                     name="projectDescription"
                     value={formData.projectDescription}
                     onChange={handleInputChange}
                     required
-                    rows={6}
-                    className="w-full bg-black/40 border border-gray-600/50 rounded-2xl px-6 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/20 transition-all duration-300 resize-none backdrop-blur-sm"
+                    rows={5}
+                    className="w-full bg-black/40 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all duration-300 resize-none"
                     placeholder="Describe your project vision, goals, and specific requirements..."
                   ></textarea>
                 </div>
 
                 {/* File Attachments */}
-                <div className="mt-8 space-y-3">
+                <div className="mt-6 space-y-3">
                   <label className="block text-gray-300 font-medium">
-                    Attachments <span className="text-gray-500">(Optional - Max 10MB per file)</span>
+                    Project Files <span className="text-gray-500">(Optional - Max 10MB per file)</span>
                   </label>
-                  <div className="space-y-4">
-                    <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className="border-2 border-dashed border-gray-600/50 rounded-2xl p-8 text-center hover:border-white/50 hover:bg-white/5 transition-all duration-300 cursor-pointer group"
-                    >
-                      <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">📎</div>
-                      <p className="text-gray-400 mb-2 text-lg">Drop files here or click to upload</p>
-                      <p className="text-gray-500">PDF, DOC, TXT, Images, ZIP files supported</p>
-                      <p className="text-gray-600 text-sm mt-2">Maximum 10MB per file</p>
-                    </div>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      multiple
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.webp,.zip"
-                    />
-
-                    {/* File List */}
-                    {attachments.length > 0 && (
-                      <div className="space-y-3">
-                        <h4 className="text-gray-300 font-medium">Selected Files:</h4>
-                        {attachments.map((file, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between bg-black/40 backdrop-blur-sm rounded-xl px-4 py-3 border border-gray-600/50"
-                          >
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                                <span className="text-blue-400 text-xs font-bold">
-                                  {file.name.split(".").pop().toUpperCase()}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-gray-300 font-medium">{file.name}</span>
-                                <div className="text-gray-500 text-sm">{formatFileSize(file.size)}</div>
-                              </div>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => removeFile(index)}
-                              className="text-red-400 hover:text-red-300 transition-colors duration-300 p-2 hover:bg-red-500/10 rounded-lg"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-gray-600/50 rounded-xl p-6 text-center hover:border-purple-400/50 hover:bg-purple-500/5 transition-all duration-300 cursor-pointer group"
+                  >
+                    <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">📎</div>
+                    <p className="text-gray-400 mb-1 font-medium">Drop files here or click to upload</p>
+                    <p className="text-gray-500 text-sm">PDF, DOC, Images, ZIP files supported</p>
                   </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.webp,.zip"
+                  />
+
+                  {attachments.length > 0 && (
+                    <div className="space-y-2 mt-4">
+                      <h4 className="text-gray-300 font-medium">📁 Attached Files:</h4>
+                      {attachments.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between bg-black/40 rounded-lg px-4 py-3 border border-gray-600/50"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                              <span className="text-purple-400 text-xs font-bold">
+                                {file.name.split(".").pop()?.toUpperCase()}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-300 font-medium">{file.name}</span>
+                              <div className="text-gray-500 text-sm">{formatFileSize(file.size)}</div>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeFile(index)}
+                            className="text-red-400 hover:text-red-300 transition-colors duration-300 p-2 hover:bg-red-500/10 rounded-lg"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Communication Preferences Card */}
-            <div className="group relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-green-500/20 to-cyan-500/20 rounded-3xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative bg-gray-900/60 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-10 hover:border-gray-600/50 transition-all duration-300">
-                <div className="flex items-center space-x-3 mb-8">
+            {/* Step 3: Communication Preferences */}
+            {currentStep === 3 && (
+              <div className="bg-gray-900/60 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-8 shadow-2xl animate-slide-in">
+                <div className="flex items-center space-x-4 mb-8">
                   <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-cyan-500 rounded-xl flex items-center justify-center">
-                    <span className="text-white text-xl font-bold">3</span>
+                    <span className="text-white text-xl">💬</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white">Communication Preferences</h3>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">Communication Preferences</h3>
+                    <p className="text-gray-400">How would you like to connect?</p>
+                  </div>
                 </div>
 
                 {/* Contact Method */}
@@ -570,8 +895,12 @@ const HirePage = () => {
                     Preferred Contact Method <span className="text-red-400">*</span>
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {["Email", "WhatsApp", "Zoom Call"].map((method) => (
-                      <label key={method} className="relative cursor-pointer">
+                    {[
+                      { method: "Email", icon: "📧", desc: "Professional communication" },
+                      { method: "WhatsApp", icon: "💬", desc: "Quick messaging" },
+                      { method: "Zoom Call", icon: "📹", desc: "Face-to-face discussion" },
+                    ].map(({ method, icon, desc }) => (
+                      <label key={method} className="relative cursor-pointer group">
                         <input
                           type="radio"
                           name="contactMethod"
@@ -581,52 +910,287 @@ const HirePage = () => {
                           className="sr-only"
                         />
                         <div
-                          className={`p-4 rounded-2xl border-2 transition-all duration-300 text-center ${
+                          className={`p-4 rounded-xl border-2 transition-all duration-300 text-center group-hover:scale-105 ${
                             formData.contactMethod === method
-                              ? "border-white bg-white/10 text-white"
+                              ? "border-green-400 bg-green-500/10 text-white shadow-lg"
                               : "border-gray-600/50 bg-black/20 text-gray-400 hover:border-gray-500 hover:text-gray-300"
                           }`}
                         >
-                          <span className="font-medium">{method}</span>
+                          <div className="text-2xl mb-2">{icon}</div>
+                          <span className="font-medium block">{method}</span>
+                          <span className="text-xs text-gray-500 mt-1 block">{desc}</span>
                         </div>
                       </label>
                     ))}
                   </div>
                 </div>
 
-                {/* Available Time */}
-                <div className="grid md:grid-cols-2 gap-8">
+                {/* Available Date and Time */}
+                <div className="grid md:grid-cols-2 gap-6 mb-6">
+                  {/* Calendar Picker */}
                   <div className="space-y-3">
-                    <label className="block text-gray-300 font-medium">Available Date</label>
-                    <input
-                      type="date"
-                      name="availableDate"
-                      value={formData.availableDate}
-                      onChange={handleInputChange}
-                      className="w-full bg-black/40 border border-gray-600/50 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-white focus:ring-2 focus:ring-white/20 transition-all duration-300 backdrop-blur-sm"
-                    />
+                    <label className="block text-gray-300 font-medium">
+                      Available Date <span className="text-gray-500">(Optional)</span>
+                    </label>
+                    <div className="relative">
+                      <div
+                        onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                        className="w-full bg-black/40 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/20 transition-all duration-300 cursor-pointer flex items-center justify-between"
+                      >
+                        <span className={selectedDate ? "text-white" : "text-gray-500"}>
+                          {formatDisplayDate(selectedDate)}
+                        </span>
+                        <div
+                          className={`transform transition-transform duration-200 ${isCalendarOpen ? "rotate-180" : ""}`}
+                        >
+                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Calendar Dropdown */}
+                      {isCalendarOpen && (
+                        <>
+                          <div className="fixed inset-0 z-[99998]" onClick={() => setIsCalendarOpen(false)} />
+                          <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 border border-gray-700 rounded-xl p-4 shadow-2xl z-[99999] backdrop-blur-xl">
+                            <div className="flex items-center justify-between mb-4">
+                              <button
+                                type="button"
+                                onClick={() => navigateMonth(-1)}
+                                className="p-2 hover:bg-gray-800 rounded-lg transition-colors duration-200"
+                              >
+                                <svg
+                                  className="w-4 h-4 text-gray-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15 19l-7-7 7-7"
+                                  />
+                                </svg>
+                              </button>
+                              <h3 className="text-lg font-semibold text-white">
+                                {months[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+                              </h3>
+                              <button
+                                type="button"
+                                onClick={() => navigateMonth(1)}
+                                className="p-2 hover:bg-gray-800 rounded-lg transition-colors duration-200"
+                              >
+                                <svg
+                                  className="w-4 h-4 text-gray-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </button>
+                            </div>
+
+                            <div className="grid grid-cols-7 gap-1 mb-2">
+                              {daysOfWeek.map((day) => (
+                                <div key={day} className="text-center text-xs font-medium text-gray-400 py-2">
+                                  {day}
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className="grid grid-cols-7 gap-1">
+                              {days.map((date, index) => (
+                                <button
+                                  key={index}
+                                  type="button"
+                                  onClick={() => date && !isPastDate(date) && handleDateSelect(date)}
+                                  disabled={!date || isPastDate(date)}
+                                  className={`h-8 w-8 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                    !date ? "invisible" : ""
+                                  } ${
+                                    isPastDate(date)
+                                      ? "text-gray-600 cursor-not-allowed"
+                                      : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                                  } ${isToday(date) ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" : ""} ${
+                                    isSameDay(date, selectedDate) ? "bg-green-500 text-white font-bold" : ""
+                                  }`}
+                                >
+                                  {date?.getDate()}
+                                </button>
+                              ))}
+                            </div>
+
+                            <div className="flex gap-2 mt-4 pt-3 border-t border-gray-700">
+                              <button
+                                type="button"
+                                onClick={() => handleDateSelect(new Date())}
+                                className="flex-1 py-2 px-3 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-all duration-200 text-sm font-medium"
+                              >
+                                Today
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const tomorrow = new Date()
+                                  tomorrow.setDate(tomorrow.getDate() + 1)
+                                  handleDateSelect(tomorrow)
+                                }}
+                                className="flex-1 py-2 px-3 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-all duration-200 text-sm font-medium"
+                              >
+                                Tomorrow
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
 
+                  {/* Time Picker */}
                   <div className="space-y-3">
-                    <label className="block text-gray-300 font-medium">Available Time</label>
-                    <input
-                      type="time"
-                      name="availableTime"
-                      value={formData.availableTime}
-                      onChange={handleInputChange}
-                      className="w-full bg-black/40 border border-gray-600/50 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-white focus:ring-2 focus:ring-white/20 transition-all duration-300 backdrop-blur-sm"
-                    />
+                    <label className="block text-gray-300 font-medium">
+                      Available Time <span className="text-gray-500">(Optional)</span>
+                    </label>
+                    <div className="relative">
+                      <div
+                        onClick={() => setIsTimeOpen(!isTimeOpen)}
+                        className="w-full bg-black/40 border border-gray-600/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/20 transition-all duration-300 cursor-pointer flex items-center justify-between"
+                      >
+                        <span className={formData.availableTime ? "text-white" : "text-gray-500"}>
+                          {getDisplayTime()}
+                        </span>
+                        <div
+                          className={`transform transition-transform duration-200 ${isTimeOpen ? "rotate-180" : ""}`}
+                        >
+                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Time Picker Dropdown */}
+                      {isTimeOpen && (
+                        <>
+                          <div className="fixed inset-0 z-[99998]" onClick={() => setIsTimeOpen(false)} />
+                          <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 border border-gray-700 rounded-xl p-4 shadow-2xl z-[99999] backdrop-blur-xl">
+                            <div className="mb-4">
+                              <h4 className="text-sm font-medium text-gray-400 mb-3">⚡ Quick Select</h4>
+                              <div className="grid grid-cols-3 gap-2">
+                                {quickTimes.map((time, index) => (
+                                  <button
+                                    key={index}
+                                    type="button"
+                                    onClick={() => selectQuickTime(time)}
+                                    className="py-2 px-3 bg-gray-800 hover:bg-green-600 text-gray-300 hover:text-white rounded-lg transition-all duration-200 text-sm font-medium"
+                                  >
+                                    {time.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="border-t border-gray-700 pt-4">
+                              <h4 className="text-sm font-medium text-gray-400 mb-3">🕐 Custom Time</h4>
+                              <div className="flex items-center justify-center space-x-3 mb-4">
+                                <div className="text-center">
+                                  <label className="block text-xs text-gray-500 mb-1">Hour</label>
+                                  <select
+                                    value={selectedHour}
+                                    onChange={(e) => setSelectedHour(Number.parseInt(e.target.value, 10))}
+                                    className="bg-gray-800 border border-gray-600 rounded-lg px-2 py-1 text-white text-center focus:outline-none focus:border-green-400"
+                                  >
+                                    {hours.map((hour) => (
+                                      <option key={hour} value={hour}>
+                                        {hour}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="text-white text-xl font-bold mt-4">:</div>
+                                <div className="text-center">
+                                  <label className="block text-xs text-gray-500 mb-1">Min</label>
+                                  <select
+                                    value={selectedMinute}
+                                    onChange={(e) => setSelectedMinute(Number.parseInt(e.target.value, 10))}
+                                    className="bg-gray-800 border border-gray-600 rounded-lg px-2 py-1 text-white text-center focus:outline-none focus:border-green-400"
+                                  >
+                                    {minutes.map((minute) => (
+                                      <option key={minute} value={minute}>
+                                        {minute.toString().padStart(2, "0")}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="text-center">
+                                  <label className="block text-xs text-gray-500 mb-1">Period</label>
+                                  <div className="flex bg-gray-800 rounded-lg overflow-hidden">
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedPeriod("AM")}
+                                      className={`px-3 py-1 text-sm font-medium transition-all duration-200 ${
+                                        selectedPeriod === "AM"
+                                          ? "bg-green-500 text-white"
+                                          : "text-gray-300 hover:text-white hover:bg-gray-700"
+                                      }`}
+                                    >
+                                      AM
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedPeriod("PM")}
+                                      className={`px-3 py-1 text-sm font-medium transition-all duration-200 ${
+                                        selectedPeriod === "PM"
+                                          ? "bg-green-500 text-white"
+                                          : "text-gray-300 hover:text-white hover:bg-gray-700"
+                                      }`}
+                                    >
+                                      PM
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="text-center">
+                                <div className="mb-3">
+                                  <span className="text-gray-400 text-sm">Selected: </span>
+                                  <span className="text-white font-semibold">
+                                    {formatTime(selectedHour, selectedMinute, selectedPeriod)}
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={handleTimeSelect}
+                                  className="w-full py-2 bg-gradient-to-r from-green-500 to-cyan-500 text-white font-bold rounded-lg hover:from-green-600 hover:to-cyan-600 transition-all duration-300"
+                                >
+                                  Confirm Time
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
 
                 {/* How did you hear about me */}
-                <div className="mt-8 space-y-3">
-                  <label className="block text-gray-300 font-medium">How did you hear about me?</label>
+                <div className="space-y-3">
+                  <label className="block text-gray-300 font-medium">
+                    How did you hear about me? <span className="text-gray-500">(Optional)</span>
+                  </label>
                   <select
                     name="hearAbout"
                     value={formData.hearAbout}
                     onChange={handleInputChange}
-                    className="w-full bg-black/40 border border-gray-600/50 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-white focus:ring-2 focus:ring-white/20 transition-all duration-300 backdrop-blur-sm"
+                    className="w-full bg-black/40 border border-gray-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/20 transition-all duration-300"
                   >
                     <option value="" className="bg-gray-900">
                       Select an option
@@ -639,49 +1203,184 @@ const HirePage = () => {
                   </select>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Confidentiality Note */}
-            <div className="bg-gray-900/40 border border-gray-700/50 rounded-2xl p-8 backdrop-blur-xl">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl">🔒</span>
+            {/* Step 4: Review & Submit */}
+            {currentStep === 4 && (
+              <div className="bg-gray-900/60 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-8 shadow-2xl animate-slide-in">
+                <div className="flex items-center space-x-4 mb-8">
+                  <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center">
+                    <span className="text-white text-xl">📋</span>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">Review & Submit</h3>
+                    <p className="text-gray-400">Please review your information</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-white font-bold mb-2 text-lg">Confidentiality & File Security</h4>
-                  <p className="text-gray-400 leading-relaxed">
-                    All submissions and file uploads are confidential and securely stored. I respect your privacy and
-                    never share your data. Your project details and attachments are completely safe with me.
-                  </p>
+
+                <div className="space-y-6">
+                  {/* Personal Info Review */}
+                  <div className="bg-black/20 rounded-xl p-4 border border-gray-700/30">
+                    <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
+                      <span className="mr-2">👤</span> Personal Information
+                    </h4>
+                    <div className="grid md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-400">Name:</span>{" "}
+                        <span className="text-white font-medium">{formData.fullName}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Email:</span>{" "}
+                        <span className="text-white font-medium">{formData.email}</span>
+                      </div>
+                      {formData.company && (
+                        <div>
+                          <span className="text-gray-400">Company:</span>{" "}
+                          <span className="text-white font-medium">{formData.company}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Project Details Review */}
+                  <div className="bg-black/20 rounded-xl p-4 border border-gray-700/30">
+                    <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
+                      <span className="mr-2">🚀</span> Project Details
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <span className="text-gray-400">Type:</span>{" "}
+                        <span className="text-white font-medium">{formData.projectType}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Budget:</span>{" "}
+                        <span className="text-white font-medium">{formData.budget}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Timeline:</span>{" "}
+                        <span className="text-white font-medium">{formData.timeline}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Description:</span>{" "}
+                        <span className="text-white font-medium">{formData.projectDescription}</span>
+                      </div>
+                      {attachments.length > 0 && (
+                        <div>
+                          <span className="text-gray-400">Files:</span>{" "}
+                          <span className="text-white font-medium">{attachments.length} file(s) attached</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Communication Review */}
+                  <div className="bg-black/20 rounded-xl p-4 border border-gray-700/30">
+                    <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
+                      <span className="mr-2">💬</span> Communication Preferences
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <span className="text-gray-400">Contact Method:</span>{" "}
+                        <span className="text-white font-medium">{formData.contactMethod}</span>
+                      </div>
+                      {formData.availableDate && (
+                        <div>
+                          <span className="text-gray-400">Available Date:</span>{" "}
+                          <span className="text-white font-medium">{formatDisplayDate(selectedDate)}</span>
+                        </div>
+                      )}
+                      {formData.availableTime && (
+                        <div>
+                          <span className="text-gray-400">Available Time:</span>{" "}
+                          <span className="text-white font-medium">{getDisplayTime()}</span>
+                        </div>
+                      )}
+                      {formData.hearAbout && (
+                        <div>
+                          <span className="text-gray-400">Heard About:</span>{" "}
+                          <span className="text-white font-medium">{formData.hearAbout}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Privacy Notice */}
+                <div className="mt-8 bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-xl p-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <span className="text-xl">🔒</span>
+                    </div>
+                    <div>
+                      <h4 className="text-white font-bold mb-2 text-lg">Privacy & Security</h4>
+                      <p className="text-gray-300 leading-relaxed text-sm">
+                        Your information is completely secure and confidential. I respect your privacy and will never
+                        share your data with third parties. All project details and files are stored securely and used
+                        solely for project communication.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Submit Button */}
-            <div className="text-center pt-8">
+            {/* Navigation Buttons */}
+            <div className="flex justify-between items-center pt-8">
               <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`group relative px-16 py-6 bg-white text-black font-bold text-xl rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden ${
-                  isSubmitting ? "animate-pulse" : ""
+                type="button"
+                onClick={prevStep}
+                disabled={currentStep === 1}
+                className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                  currentStep === 1
+                    ? "bg-gray-800 text-gray-500 cursor-not-allowed"
+                    : "bg-gray-700 text-white hover:bg-gray-600 hover:scale-105"
                 }`}
               >
-                <span className="relative z-10 flex items-center space-x-3">
-                  {isSubmitting ? (
-                    <>
-                      <div className="w-6 h-6 border-3 border-black border-t-transparent rounded-full animate-spin"></div>
-                      <span>{uploadProgress > 0 ? `Uploading... ${uploadProgress}%` : "Submitting Request..."}</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>📤</span>
-                      <span>Request a Quote</span>
-                      <span className="group-hover:translate-x-2 transition-transform duration-300">→</span>
-                    </>
-                  )}
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-200 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                ← Previous
               </button>
+
+              <div className="text-center">
+                <span className="text-gray-400 text-sm">
+                  Step {currentStep} of {stepTitles.length}
+                </span>
+              </div>
+
+              {currentStep < 4 ? (
+                <button
+                  type="button"
+                  onClick={nextStep}
+                  disabled={!isStepValid(currentStep)}
+                  className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                    isStepValid(currentStep)
+                      ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 hover:scale-105 shadow-lg"
+                      : "bg-gray-800 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  Next →
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !isFormValid()}
+                  className={`px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300 ${
+                    isSubmitting || !isFormValid()
+                      ? "bg-gray-800 text-gray-500 cursor-not-allowed animate-pulse"
+                      : "bg-gradient-to-r from-green-500 to-cyan-500 text-white hover:from-green-600 hover:to-cyan-600 hover:scale-105 shadow-lg"
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center space-x-2">
+                      <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                      <span>Submitting...</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center space-x-2">
+                      <span>🚀</span>
+                      <span>Send Request</span>
+                    </span>
+                  )}
+                </button>
+              )}
             </div>
           </form>
         </div>
@@ -691,73 +1390,97 @@ const HirePage = () => {
 
       {/* Custom Styles */}
       <style jsx>{`
-      @keyframes fade-in {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-
-      @keyframes scale-in {
-        from { 
-          opacity: 0; 
-          transform: scale(0.8) translateY(20px); 
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
-        to { 
-          opacity: 1; 
-          transform: scale(1) translateY(0); 
-        }
-      }
 
-      @keyframes tick-circle {
-        0% { 
-          transform: scale(0.8); 
-          border-color: #6b7280; 
+        @keyframes scale-in {
+          from { 
+            opacity: 0; 
+            transform: scale(0.9) translateY(20px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: scale(1) translateY(0); 
+          }
         }
-        50% { 
-          transform: scale(1.1); 
-          border-color: #10b981; 
+
+        @keyframes slide-in {
+          from { 
+            opacity: 0; 
+            transform: translateX(20px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateX(0); 
+          }
         }
-        100% { 
-          transform: scale(1); 
-          border-color: #10b981; 
+
+        @keyframes tick-circle {
+          0% { 
+            transform: scale(0.8); 
+            border-color: #6b7280; 
+          }
+          50% { 
+            transform: scale(1.1); 
+            border-color: #10b981; 
+          }
+          100% { 
+            transform: scale(1); 
+            border-color: #10b981; 
+          }
         }
-      }
 
-      @keyframes tick-draw {
-        0% { 
-          opacity: 0;
-          stroke-dasharray: 0 50;
+        @keyframes tick-draw {
+          0% { 
+            opacity: 0;
+            stroke-dasharray: 0 50;
+          }
+          50% { 
+            opacity: 1;
+            stroke-dasharray: 25 50;
+          }
+          100% { 
+            opacity: 1;
+            stroke-dasharray: 50 50;
+          }
         }
-        50% { 
-          opacity: 1;
-          stroke-dasharray: 25 50;
+
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
-        100% { 
-          opacity: 1;
-          stroke-dasharray: 50 50;
+
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out forwards;
         }
-      }
 
-      .animate-fade-in {
-        animation: fade-in 0.3s ease-out forwards;
-      }
+        .animate-scale-in {
+          animation: scale-in 0.4s ease-out forwards;
+        }
 
-      .animate-scale-in {
-        animation: scale-in 0.4s ease-out forwards;
-      }
+        .animate-slide-in {
+          animation: slide-in 0.5s ease-out forwards;
+        }
 
-      .animate-tick-circle {
-        animation: tick-circle 0.6s ease-out forwards;
-      }
+        .animate-tick-circle {
+          animation: tick-circle 0.6s ease-out forwards;
+        }
 
-      .animate-tick-draw {
-        animation: tick-draw 0.8s ease-out 0.3s forwards;
-      }
+        .animate-tick-draw {
+          animation: tick-draw 0.8s ease-out 0.3s forwards;
+        }
 
-      .tick-path {
-        stroke-dasharray: 50;
-        stroke-dashoffset: 50;
-      }
-    `}</style>
+        .animate-spin-slow {
+          animation: spin-slow 20s linear infinite;
+        }
+
+        .tick-path {
+          stroke-dasharray: 50;
+          stroke-dashoffset: 50;
+        }
+      `}</style>
     </div>
   )
 }
