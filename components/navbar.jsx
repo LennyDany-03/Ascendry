@@ -13,7 +13,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Search, Menu } from "lucide-react"
+import { Search, Menu, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import React, { useState, useEffect } from "react"
 
@@ -154,19 +154,17 @@ export default function Navbar() {
                 </NavigationMenuContent>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/freebies" legacyBehavior passHref>
-                  <NavigationMenuLink
-                    className={cn(
-                      navigationMenuTriggerStyle(),
-                      "text-white hover:text-teal-400 transition-colors text-lg font-medium bg-transparent hover:bg-white/10",
-                    )}
-                  >
-                    Freebies
-                  </NavigationMenuLink>
-                </Link>
+                <NavigationMenuLink
+                  asChild
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "text-white hover:text-teal-400 transition-colors text-lg font-medium bg-transparent hover:bg-white/10",
+                  )}
+                >
+                  <Link href="/freebies">Freebies</Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
-              <NavigationMenuItem>
-              </NavigationMenuItem>
+              <NavigationMenuItem></NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
         </div>
@@ -179,12 +177,25 @@ export default function Navbar() {
           <Button variant="ghost" className="text-white hover:bg-white/10 text-base font-medium">
             Login
           </Button>
-          <Button
-            size="sm"
-            className="bg-gradient-to-r from-aqua-500 to-teal-600 hover:from-aqua-600 hover:to-teal-700 px-5 py-2.5 text-base font-semibold shadow-lg shadow-teal-500/25 transition-all duration-300"
-          >
-            Sign Up
-          </Button>
+          <div className="relative inline-flex items-center group">
+            <Button
+              size="sm"
+              aria-label="Sign up"
+              className="relative rounded-full px-6 py-2.5 text-sm font-semibold text-white border border-white/15 bg-white/0 hover:bg-white/5 transition-all duration-300 ease-out shadow-none hover:shadow-[0_8px_24px_rgba(0,0,0,0.25)] transform-gpu hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-teal-400/50 focus-visible:outline-none"
+            >
+              <span aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
+                <span className="absolute left-0 top-0 h-full w-0 bg-gradient-to-r from-transparent via-white/15 to-transparent transition-[width] duration-500 ease-out group-hover:w-full motion-reduce:transition-none" />
+              </span>
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-white/10"
+              />
+              <span className="relative z-10 flex items-center gap-2">
+                <span>Sign Up</span>
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-out group-hover:translate-x-1 motion-reduce:transform-none" />
+              </span>
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Menu (Hamburger Icon) */}
@@ -256,12 +267,28 @@ export default function Navbar() {
                   >
                     Login
                   </Button>
-                  <Button
-                    size="lg"
-                    className="w-full bg-gradient-to-r from-teal-500 to-aqua-600 hover:from-teal-600 hover:to-aqua-700 px-5 py-2.5 text-base font-semibold shadow-lg shadow-teal-500/25 transition-all duration-300"
-                  >
-                    Sign Up
-                  </Button>
+                  <div className="relative inline-flex w-full items-center group">
+                    <Button
+                      size="lg"
+                      aria-label="Sign up"
+                      className="relative w-full rounded-full px-6 py-3 text-base font-semibold text-white border border-white/15 bg-white/0 hover:bg-white/5 transition-all duration-300 ease-out shadow-none hover:shadow-[0_8px_24px_rgba(0,0,0,0.25)] transform-gpu hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-teal-400/50 focus-visible:outline-none"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 overflow-hidden rounded-full"
+                      >
+                        <span className="absolute left-0 top-0 h-full w-0 bg-gradient-to-r from-transparent via-white/15 to-transparent transition-[width] duration-500 ease-out group-hover:w-full motion-reduce:transition-none" />
+                      </span>
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-white/10"
+                      />
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        <span>Sign Up</span>
+                        <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-out group-hover:translate-x-1 motion-reduce:transform-none" />
+                      </span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             </SheetContent>

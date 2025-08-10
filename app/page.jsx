@@ -5,9 +5,6 @@ import {
   ArrowRight,
   LayoutTemplate,
   Briefcase,
-  ShoppingCart,
-  BookOpen,
-  User2,
   Zap,
   DollarSign,
   Settings,
@@ -272,13 +269,26 @@ export default function HomePage() {
                 {product.subheadline}
               </motion.p>
               <motion.div variants={itemVariants}>
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-teal-500 to-aqua-600 hover:from-teal-600 hover:to-aqua-700 px-8 py-4 text-lg font-semibold shadow-lg shadow-teal-500/25 transition-all duration-300"
-                >
-                  {product.buttonText}
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
+                <div className="relative inline-block group">
+                  <div className="absolute inset-[-2px] rounded-full bg-gradient-to-r from-teal-400 via-emerald-400 to-lime-400 opacity-70 blur-md transition-opacity group-hover:opacity-100" />
+                  <Button
+                    size="lg"
+                    aria-label="Explore feature"
+                    className="relative rounded-full px-10 py-5 text-lg font-semibold text-white bg-gradient-to-b from-slate-900/80 to-slate-900/50 border border-teal-500/30 hover:border-teal-400/60 backdrop-blur-md shadow-[0_10px_30px_rgba(20,184,166,0.35)] hover:shadow-[0_12px_40px_rgba(34,197,94,0.45)] transition-all duration-300 overflow-hidden"
+                  >
+                    {/* Subtle inner texture */}
+                    <span className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.10),transparent_40%),radial-gradient(circle_at_70%_80%,rgba(34,197,94,0.12),transparent_45%)]" />
+                    {/* Content */}
+                    <span className="relative z-10 flex items-center">
+                      {product.buttonText}
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </span>
+                    {/* Animated shine */}
+                    <span className="pointer-events-none absolute left-[-30%] top-0 h-full w-[35%] -skew-x-12 bg-white/10 blur-md opacity-0 translate-x-0 transition-all duration-700 group-hover:opacity-100 group-hover:translate-x-[220%]" />
+                    {/* Soft inner ring */}
+                    <span className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-teal-400/40" />
+                  </Button>
+                </div>
               </motion.div>
             </motion.div>
           </motion.div>
@@ -566,13 +576,23 @@ export default function HomePage() {
               Unlock powerful tools, stunning templates, and unparalleled support to bring your ideas to life.
             </motion.p>
             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-teal-500 to-aqua-600 hover:from-teal-600 hover:to-aqua-700 px-10 py-4 text-lg font-semibold shadow-lg shadow-teal-500/25 transition-all duration-300"
-              >
-                Browse All Products
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+                  <Button
+                    size="lg"
+                    aria-label="Explore feature"
+                    className="relative rounded-full px-10 py-5 text-lg font-semibold text-white bg-gradient-to-b from-slate-900/80 to-slate-900/50 border border-teal-500/30 hover:border-teal-400/60 backdrop-blur-md shadow-[0_10px_30px_rgba(20,184,166,0.35)] hover:shadow-[0_12px_40px_rgba(34,197,94,0.45)] transition-all duration-300 overflow-hidden"
+                  >
+                    {/* Subtle inner texture */}
+                    <span className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.10),transparent_40%),radial-gradient(circle_at_70%_80%,rgba(34,197,94,0.12),transparent_45%)]" />
+                    {/* Content */}
+                    <span className="relative z-10 flex items-center">
+                      Browse All Product
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </span>
+                    {/* Animated shine */}
+                    <span className="pointer-events-none absolute left-[-30%] top-0 h-full w-[35%] -skew-x-12 bg-white/10 blur-md opacity-0 translate-x-0 transition-all duration-700 group-hover:opacity-100 group-hover:translate-x-[220%]" />
+                    {/* Soft inner ring */}
+                    <span className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-teal-400/40" />
+                  </Button>
             </motion.div>
           </motion.div>
         </div>
